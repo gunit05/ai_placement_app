@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Placement App</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #040b2d, #101a56, #25074f);
+      color: white;
+      overflow-x: hidden;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    .hero {
+      min-height: 100vh;
+      padding: 60px 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: #7b2ff7;
+      filter: blur(140px);
+      top: 0;
+      left: -100px;
+      opacity: 0.5;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      background: #00d4ff;
+      filter: blur(140px);
+      bottom: 0;
+      right: -100px;
+      opacity: 0.4;
+    }
+
+    h1 {
+      font-size: 4rem;
+      margin-bottom: 16px;
+      background: linear-gradient(90deg, #fff, #b388ff, #00e5ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%,100% { transform: translateY(0px); }
+      50% { transform: translateY(-12px); }
+    }
+
+    .subtitle {
+      font-size: 1.3rem;
+      color: #d6d6d6;
+      margin-bottom: 35px;
+    }
+
+    .btn {
+      background: linear-gradient(90deg, #7b2ff7, #e940ff);
+      border: none;
+      padding: 16px 36px;
+      font-size: 18px;
+      border-radius: 40px;
+      cursor: pointer;
+      color: white;
+      font-weight: bold;
+      transition: 0.3s;
+      box-shadow: 0 10px 30px rgba(123,47,247,0.4);
+    }
+
+    .btn:hover {
+      transform: translateY(-4px) scale(1.05);
+    }
+
+    section {
+      padding: 80px 30px;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 50px;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
+      gap: 25px;
+      max-width: 1400px;
+      margin: auto;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(16px);
+      border-radius: 22px;
+      padding: 28px;
+      transition: 0.35s;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    }
+
+    .card:hover {
+      transform: translateY(-10px) scale(1.03);
+    }
+
+    .card h3 {
+      font-size: 1.3rem;
+      margin-bottom: 14px;
+    }
+
+    .card p {
+      color: #d8d8d8;
+      line-height: 1.6;
+    }
+
+    .screenshots {
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      padding: 20px;
+      scroll-snap-type: x mandatory;
+    }
+
+    .screenshots img {
+      width: 280px;
+      border-radius: 20px;
+      scroll-snap-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .tech-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      justify-content: center;
+    }
+
+    .chip {
+      background: rgba(255,255,255,0.08);
+      padding: 12px 20px;
+      border-radius: 30px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    footer {
+      text-align: center;
+      padding: 35px;
+      background: rgba(0,0,0,0.4);
+      color: #bbb;
+    }
+
+    @media(max-width:768px) {
+      h1 {
+        font-size: 2.7rem;
+      }
+
+      .section-title {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <section class="hero">
+    <h1>🚀 AI Placement App</h1>
+    <p class="subtitle">AI Powered Career Growth Platform</p>
+
+    <a href="app-release.apk" download>
+      <button class="btn">⬇ Download APK</button>
+    </a>
+  </section>
+
+  <section>
+    <h2 class="section-title">🔥 Premium Features</h2>
+
+    <div class="features">
+      <div class="card">
+        <h3>📄 AI Resume Analysis</h3>
+        <p>Upload resume, get ATS score, improvement suggestions, analytics and manual admin review.</p>
+      </div>
+
+      <div class="card">
+        <h3>🎤 AI Mock Interview</h3>
+        <p>Speech-to-text interview with AI voice questions, timer, auto next question and live scoring.</p>
+      </div>
+
+      <div class="card">
+        <h3>🎥 Video Interview</h3>
+        <p>Front camera interview recording, Cloudinary upload, Supabase video storage and replay anytime.</p>
+      </div>
+
+      <div class="card">
+        <h3>🤖 AI Career Chatbot</h3>
+        <p>Career guidance, resume help, interview tips, skill suggestions and placement support.</p>
+      </div>
+
+      <div class="card">
+        <h3>📚 Aptitude Preparation</h3>
+        <p>Placement aptitude practice, quizzes, preparation modules and learning resources.</p>
+      </div>
+
+      <div class="card">
+        <h3>💻 Coding Interview Practice</h3>
+        <p>Technical interview preparation, coding questions and placement coding practice.</p>
+      </div>
+
+      <div class="card">
+        <h3>💼 Job Portal</h3>
+        <p>Browse jobs, apply instantly, track applications and get placement updates.</p>
+      </div>
+
+      <div class="card">
+        <h3>⭐ Shortlist Dashboard</h3>
+        <p>Admin can review applications and shortlist candidates efficiently.</p>
+      </div>
+
+      <div class="card">
+        <h3>📊 Analytics Dashboard</h3>
+        <p>Performance graphs, interview analytics, resume analytics and profile insights.</p>
+      </div>
+
+      <div class="card">
+        <h3>🔐 Secure Authentication</h3>
+        <p>Login, signup, forgot password, reset password and biometric face lock support.</p>
+      </div>
+
+      <div class="card">
+        <h3>📷 Profile Management</h3>
+        <p>Upload profile photo, manage account settings, feedback and support access.</p>
+      </div>
+
+      <div class="card">
+        <h3>🧑‍💼 Admin Dashboard</h3>
+        <p>Manage users, jobs, logs analytics, resume scoring, applications and feedback.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title">🛠 Tech Stack</h2>
+
+    <div class="tech-stack">
+      <div class="chip">Flutter</div>
+      <div class="chip">Dart</div>
+      <div class="chip">Supabase</div>
+      <div class="chip">PostgreSQL</div>
+      <div class="chip">Cloudinary</div>
+      <div class="chip">speech_to_text</div>
+      <div class="chip">flutter_tts</div>
+      <div class="chip">camera</div>
+      <div class="chip">video_player</div>
+      <div class="chip">local_auth</div>
+      <div class="chip">image_picker</div>
+      <div class="chip">PDF Generator</div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title">📱 App Screenshots</h2>
+
+    <div class="screenshots">
+      <img src="s1.png" alt="Login Screen">
+      <img src="s2.png" alt="Interview Screen">
+      <img src="s3.png" alt="Dashboard">
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title">👨‍💻 Developer</h2>
+
+    <div class="features">
+      <div class="card">
+        <h3>Gunit Raj</h3>
+        <p>
+          📧 gunitraj90@gmail.com <br><br>
+          Passionate Flutter developer with a knack for building innovative apps. With 3+ years of experience, I specialize in creating seamless user experiences and robust backend integrations. I thrive on solving complex problems and am always eager to learn new technologies. Let's connect and build something amazing together!
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    © 2026 AI Placement App | Built with ❤️ by Gunit Raj
+  </footer>
+
+</body>
+</html>

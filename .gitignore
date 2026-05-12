@@ -1,0 +1,27 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+.pub/
+build/
+
+# Android
+android/build/
+android/.gradle/
+*.apk
+*.aab
+
+# iOS
+ios/Pods/
+
+# Logs & temp
+*.log
+*.tmp
+*.hprof
+
+# IDE files
+.vscode/
+.idea/
+
+# Mac / Windows
+.DS_Store
+Thumbs.db

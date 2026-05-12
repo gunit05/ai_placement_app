@@ -1,0 +1,77 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--  INTERNET -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!--  CAMERA -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+
+    <!--  BIOMETRIC (Face ID / Fingerprint) -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+    <uses-permission android:name="android.permission.USE_FINGERPRINT"/>
+    
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <application
+        android:label="ai_placement_app"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+
+            <!--  Flutter Theme -->
+            <meta-data
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme"/>
+
+            <!--  App Launcher -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+
+            <!--  Supabase Deep Link -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <!-- Reset Password -->
+                <data
+                    android:scheme="io.supabase.flutter"
+                    android:host="reset-password"/>
+
+                <!-- Google Login Callback -->
+                <data
+                    android:scheme="io.supabase.flutter"
+                    android:host="login-callback"/>
+            </intent-filter>
+
+        </activity>
+
+        <!--  Flutter Embedding -->
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2"/>
+
+    </application>
+
+    <!-- Required for text processing -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+    </queries>
+
+</manifest>

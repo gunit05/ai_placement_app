@@ -1,0 +1,352 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import '../theme/premium_ui.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+class ChatbotScreen extends StatefulWidget {
+  const ChatbotScreen({super.key});
+
+  @override
+  State<ChatbotScreen> createState() => _ChatbotScreenState();
+}
+
+class _ChatbotScreenState extends State<ChatbotScreen> {
+  final TextEditingController controller = TextEditingController();
+  final ScrollController scrollController = ScrollController();
+
+  List<Map<String, String>> messages = [];
+  bool loading = false;
+
+  final String apiKey = dotenv.env['GROQ_API_KEY'] ?? '';
+
+  final List<Map<String, dynamic>> faq = [
+    {
+      "keywords": ["hello", "hi", "hey"],
+      "answer": "Hello 👋 How can I help you today?"
+    },
+    {
+      "keywords": ["job", "career"],
+      "answer": "Go to Jobs section and apply for suitable opportunities."
+    },
+    {
+      "keywords": ["resume"],
+      "answer": "Upload your resume for AI analysis & ATS scoring."
+    },
+    {
+      "keywords": ["interview"],
+      "answer": "Use AI Interview module for mock interview practice."
+    },
+    {
+      "keywords": ["skills"],
+      "answer": "Add skills in profile for better recommendations."
+    },
+    {
+      "keywords": ["what can you do", "who are you"],
+      "answer":
+          "I can help with jobs, interviews, aptitude, resume & career guidance."
+    },
+  ];
+
+  String? getSmartReply(String userMsg) {
+    final msg = userMsg.toLowerCase();
+    int bestScore = 0;
+    String bestAnswer = "";
+
+    for (final item in faq) {
+      int score = 0;
+
+      for (final keyword in item["keywords"]) {
+        if (msg.contains(keyword)) score++;
+      }
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestAnswer = item["answer"];
+      }
+    }
+
+    if (bestScore > 0) return bestAnswer;
+    return null;
+  }
+
+  Future<void> sendMessage() async {
+    final text = controller.text.trim();
+
+    if (text.isEmpty || loading) return;
+
+    setState(() {
+      messages.add({"user": text});
+      loading = true;
+    });
+
+    controller.clear();
+    scrollDown();
+
+    final manualReply = getSmartReply(text);
+
+    if (manualReply != null) {
+      await Future.delayed(const Duration(milliseconds: 700));
+
+      if (!mounted) return;
+
+      setState(() {
+        messages.add({"bot": manualReply});
+        loading = false;
+      });
+
+      scrollDown();
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse('https://api.groq.com/openai/v1/chat/completions'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $apiKey',
+        },
+        body: jsonEncode({
+          "model": "llama-3.3-70b-versatile",
+          "messages": [
+            {
+              "role": "system",
+              "content":
+                  "You are an AI career guidance assistant for placement app. Help users with jobs, resume, interviews, aptitude, coding, and career guidance."
+            },
+            {
+              "role": "user",
+              "content": text
+            }
+          ],
+          "temperature": 0.7,
+          "max_tokens": 500
+        }),
+      );
+
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final aiReply = data['choices'][0]['message']['content'];
+
+        setState(() {
+          messages.add({"bot": aiReply});
+        });
+      } else {
+        setState(() {
+          messages.add({
+            "bot": "API Error ${response.statusCode}\n${response.body}"
+          });
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        messages.add({
+          "bot": "Connection Error: $e",
+        });
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          loading = false;
+        });
+
+        scrollDown();
+      }
+    }
+  }
+
+  void scrollDown() {
+    Future.delayed(const Duration(milliseconds: 150), () {
+      if (!scrollController.hasClients) return;
+
+      scrollController.animateTo(
+        scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
+  Widget buildBubble(String text, bool isBot) {
+    return Align(
+      alignment: isBot ? Alignment.centerLeft : Alignment.centerRight,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.all(16),
+        constraints: const BoxConstraints(maxWidth: 300),
+        decoration: BoxDecoration(
+          gradient: isBot
+              ? const LinearGradient(
+                  colors: [AppTheme.card1, AppTheme.card2],
+                )
+              : const LinearGradient(
+                  colors: [AppTheme.primary, AppTheme.secondary],
+                ),
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(24),
+            topRight: const Radius.circular(24),
+            bottomLeft: Radius.circular(isBot ? 4 : 24),
+            bottomRight: Radius.circular(isBot ? 24 : 4),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: isBot
+                  ? Colors.black26
+                  : AppTheme.primary.withOpacity(0.35),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Text(
+          text,
+          style: const TextStyle(
+            color: Colors.white,
+            height: 1.5,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget quickChip(String text) {
+    return GestureDetector(
+      onTap: () {
+        controller.text = text;
+        sendMessage();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white10,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: Colors.white24),
+        ),
+        child: Text(
+          text,
+          style: const TextStyle(color: Colors.white70),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PremiumScreen(
+      title: "AI Assistant",
+      subtitle: "Career guidance chatbot",
+      icon: Icons.smart_toy,
+      scrollable: false,
+      child: Column(
+        children: [
+          if (messages.isEmpty)
+            PremiumCard(
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(22),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Colors.purple, Colors.deepPurple],
+                      ),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: const Icon(
+                      Icons.smart_toy,
+                      color: Colors.white,
+                      size: 52,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  const Text(
+                    "Ask your AI Assistant",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: [
+                      quickChip("Resume Help"),
+                      quickChip("Find Jobs"),
+                      quickChip("Interview Tips"),
+                      quickChip("Career Advice"),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          const SizedBox(height: 14),
+          Expanded(
+            child: ListView.builder(
+              controller: scrollController,
+              itemCount: messages.length,
+              itemBuilder: (_, i) {
+                final msg = messages[i];
+                final isBot = msg.containsKey("bot");
+                return buildBubble(msg.values.first, isBot);
+              },
+            ),
+          ),
+          if (loading)
+            const Padding(
+              padding: EdgeInsets.only(bottom: 12),
+              child: CircularProgressIndicator(
+                color: AppTheme.primary,
+              ),
+            ),
+          PremiumCard(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: controller,
+                    onSubmitted: (_) => sendMessage(),
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      hintText: "Ask anything...",
+                      hintStyle: TextStyle(color: Colors.white54),
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: sendMessage,
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [AppTheme.primary, AppTheme.secondary],
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.send,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

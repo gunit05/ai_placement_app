@@ -4,6 +4,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'screens/splash_screen.dart';
 import 'screens/reset_password_screen.dart';
+import 'theme/premium_ui.dart';
+import 'theme/theme_controller.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -13,8 +15,8 @@ Future<void> main() async {
   await dotenv.load(fileName: ".env");
 
   await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL']!,
-    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
+    url: dotenv.env['SUPABASE_URL'] ?? '',
+    anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
   );
 
   Supabase.instance.client.auth.onAuthStateChange.listen((data) {
@@ -33,8 +35,29 @@ Future<void> main() async {
   runApp(const PlacementApp());
 }
 
-class PlacementApp extends StatelessWidget {
+class PlacementApp extends StatefulWidget {
   const PlacementApp({super.key});
+
+  @override
+  State<PlacementApp> createState() => _PlacementAppState();
+}
+
+class _PlacementAppState extends State<PlacementApp> {
+  @override
+  void initState() {
+    super.initState();
+    themeController.addListener(_refresh);
+  }
+
+  @override
+  void dispose() {
+    themeController.removeListener(_refresh);
+    super.dispose();
+  }
+
+  void _refresh() {
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,17 +65,9 @@ class PlacementApp extends StatelessWidget {
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       title: 'AI Placement App',
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color(0xff040B2D),
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-          brightness: Brightness.dark,
-        ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-        ),
-      ),
+      themeMode: themeController.themeMode,
+      theme: AppThemes.lightTheme,
+      darkTheme: AppThemes.darkTheme,
       home: const SplashScreen(),
     );
   }

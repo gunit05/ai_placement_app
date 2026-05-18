@@ -2,15 +2,12 @@ import 'package:flutter/material.dart';
 
 import 'notifications_screen.dart';
 import 'resume_upload_screen.dart';
-import 'jobs_screen.dart';
-import 'application_history_screen.dart';
 import 'chatbot_screen.dart';
 import 'interview_screen.dart';
-import 'coding_interview_screen.dart';
-import 'ai_career_guidance_screen.dart';
-import 'aptitude_screen.dart';
+import 'jobs_screen.dart';
 import 'quiz_screen.dart';
-import 'youtube_ai_videos_screen.dart';
+
+import '../theme/premium_ui.dart';
 
 class HomePage extends StatelessWidget {
   final String username;
@@ -25,74 +22,68 @@ class HomePage extends StatelessWidget {
   void go(BuildContext context, Widget page) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => page,
-      ),
+      MaterialPageRoute(builder: (_) => page),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final user = username.split('@')[0];
+
     return Scaffold(
-      backgroundColor: const Color(0xff040B2D),
+      backgroundColor: isDark ? AppTheme.darkBg : AppTheme.lightBg,
       body: Stack(
         children: [
           Positioned(
             top: -120,
             left: -80,
-            child: glow(
+            child: _glow(
               260,
-              Colors.deepPurple.withOpacity(0.25),
+              AppTheme.primary.withOpacity(0.22),
             ),
           ),
           Positioned(
             bottom: -140,
             right: -100,
-            child: glow(
+            child: _glow(
               300,
-              Colors.purpleAccent.withOpacity(0.18),
+              Colors.blue.withOpacity(0.10),
             ),
           ),
           SafeArea(
             child: SingleChildScrollView(
-              physics:
-                  const BouncingScrollPhysics(),
+              physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.all(20),
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // HEADER
-
+                  /// HEADER
                   Row(
                     children: [
                       Expanded(
                         child: Column(
                           crossAxisAlignment:
-                              CrossAxisAlignment
-                                  .start,
+                              CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Hello, ${username.split('@')[0]} 👋",
-                              maxLines: 1,
-                              overflow:
-                                  TextOverflow.ellipsis,
-                              style:
-                                  const TextStyle(
-                                color: Colors.white,
+                              "Hello, $user 👋",
+                              style: TextStyle(
+                                color: isDark
+                                    ? Colors.white
+                                    : Colors.black87,
                                 fontSize: 28,
-                                fontWeight:
-                                    FontWeight.bold,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(
-                                height: 6),
-                            const Text(
-                              "AI Career Growth Dashboard",
+                            const SizedBox(height: 6),
+                            Text(
+                              "Your AI Placement Dashboard",
                               style: TextStyle(
-                                color:
-                                    Colors.white70,
-                                fontSize: 15,
+                                color: isDark
+                                    ? Colors.white70
+                                    : Colors.black54,
+                                fontSize: 14,
                               ),
                             ),
                           ],
@@ -103,26 +94,20 @@ class HomePage extends StatelessWidget {
                           go(
                             context,
                             NotificationsScreen(
-                              username:
-                                  username,
+                              username: username,
                             ),
                           );
                         },
                         child: Container(
-                          padding:
-                              const EdgeInsets.all(
-                                  14),
-                          decoration:
-                              BoxDecoration(
-                            color: Colors.white10,
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? Colors.white10
+                                : Colors.white,
                             borderRadius:
-                                BorderRadius
-                                    .circular(18),
+                                BorderRadius.circular(18),
                           ),
-                          child: const Icon(
-                            Icons.notifications,
-                            color: Colors.white,
-                          ),
+                          
                         ),
                       ),
                     ],
@@ -130,75 +115,106 @@ class HomePage extends StatelessWidget {
 
                   const SizedBox(height: 28),
 
-                  // HERO CARD
-
+                  /// HERO AI CARD
                   Container(
                     width: double.infinity,
-                    padding:
-                        const EdgeInsets.all(28),
+                    padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      borderRadius:
-                          BorderRadius.circular(35),
-                      gradient:
-                          const LinearGradient(
-                        colors: [
-                          Color(0xff7B2FF7),
-                          Color(0xff4A00E0),
-                        ],
-                      ),
+                      gradient: AppTheme.primaryGradient,
+                      borderRadius: BorderRadius.circular(34),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.deepPurple
-                              .withOpacity(0.45),
-                          blurRadius: 35,
-                          offset:
-                              const Offset(0, 15),
+                          color: AppTheme.primary
+                              .withOpacity(0.35),
+                          blurRadius: 28,
+                          offset: const Offset(0, 14),
                         ),
                       ],
                     ),
-                    child: Column(
+                    child: Row(
                       children: [
-                        const Icon(
-                          Icons.auto_awesome,
-                          color: Colors.white,
-                          size: 75,
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          "AI Placement Assistant",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight:
-                                FontWeight.bold,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "AI Placement\nAssistant",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 28,
+                                  fontWeight:
+                                      FontWeight.bold,
+                                  height: 1.2,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                skills.isEmpty
+                                    ? "Smart interview prep, resume analysis & career growth."
+                                    : "Top skills: ${skills.take(3).join(", ")}",
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  height: 1.5,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              GestureDetector(
+                                onTap: () {
+                                  go(
+                                    context,
+                                    InterviewScreen(
+                                      username: username,
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  padding:
+                                      const EdgeInsets.symmetric(
+                                    horizontal: 18,
+                                    vertical: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius:
+                                        BorderRadius.circular(
+                                            18),
+                                  ),
+                                  child: const Text(
+                                    "Start Interview",
+                                    style: TextStyle(
+                                      color:
+                                          Color(0xff4A00E0),
+                                      fontWeight:
+                                          FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          skills.isEmpty
-                              ? "Smart placement preparation"
-                              : "Skills: ${skills.take(3).join(", ")}",
-                          textAlign:
-                              TextAlign.center,
-                          style: const TextStyle(
-                            color:
-                                Colors.white70,
+                        const SizedBox(width: 16),
+                        SizedBox(
+                          height: 170,
+                          child: Image.asset(
+                            'assets/icon/ai_robot.png',
+                            fit: BoxFit.contain,
                           ),
                         ),
                       ],
                     ),
                   ),
 
-                  const SizedBox(height: 30),
-
-                  const Text(
-                    "Explore Features",
+                  const SizedBox(height: 20),
+                  Text(
+                    "Quick Actions",
                     style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 26,
-                      fontWeight:
-                          FontWeight.bold,
+                      color: isDark
+                          ? Colors.white
+                          : Colors.black87,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
 
@@ -211,113 +227,46 @@ class HomePage extends StatelessWidget {
                     crossAxisCount: 2,
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
-                    childAspectRatio: 0.82,
+                    childAspectRatio: 0.95,
                     children: [
-                      featureCard(
+                      _quickCard(
                         context,
+                        isDark,
                         Icons.upload_file,
-                        "Resume Scanner",
-                        "Improve your ATS resume",
-                        [Colors.blue, Colors.cyan],
+                        "Upload Resume",
                         ResumeUploadScreen(
                           username: username,
                         ),
                       ),
-                      featureCard(
+                      _quickCard(
                         context,
-                        Icons.mic,
-                        "Mock Interview",
-                        "AI interview practice",
-                        [
-                          Colors.purple,
-                          Colors.pink
-                        ],
-                        InterviewScreen(
-                          username: username,
-                        ),
-                      ),
-                      featureCard(
-                        context,
-                        Icons.calculate,
-                        "Aptitude",
-                        "Quant & reasoning prep",
-                        [
-                          Colors.orange,
-                          Colors.red
-                        ],
-                        AptitudeScreen(
-                          username: username,
-                        ),
-                      ),
-                      featureCard(
-                        context,
-                        Icons.quiz,
-                        "Quiz",
-                        "Placement quiz challenge",
-                        [
-                          Colors.green,
-                          Colors.teal
-                        ],
-                        QuizScreen(
-                          username: username,
-                        ),
-                      ),
-                      featureCard(
-                        context,
-                        Icons.play_circle_fill,
-                        "AI Videos",
-                        "Recommended YouTube videos",
-                        [
-                          Colors.red,
-                          Colors.pink
-                        ],
-                        YoutubeAiVideosScreen(
-                          username: username,
-                          skills: skills,
-                        ),
-                      ),
-                      featureCard(
-                        context,
+                        isDark,
                         Icons.smart_toy,
                         "AI Chatbot",
-                        "Ask doubts instantly",
-                        [
-                          Colors.indigo,
-                          Colors.blue
-                        ],
                         const ChatbotScreen(),
                       ),
-                    
-                      featureCard(
+                      _quickCard(
                         context,
-                        Icons.history,
-                        "History",
-                        "Track applications",
-                        [
-                          Colors.teal,
-                          Colors.cyan
-                        ],
-                        ApplicationHistoryScreen(
+                        isDark,
+                        Icons.work,
+                        "Find Jobs",
+                        JobsScreen(
                           username: username,
                         ),
                       ),
-                      featureCard(
+                      _quickCard(
                         context,
-                        Icons.psychology,
-                        "Career AI",
-                        "AI career roadmap",
-                        [
-                          Colors.cyan,
-                          Colors.blue
-                        ],
-                        AICareerGuidanceScreen(
+                        isDark,
+                        Icons.quiz,
+                        "AI Quiz",
+                        QuizScreen(
                           username: username,
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 30),
                 ],
               ),
             ),
@@ -327,50 +276,56 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget featureCard(
+  Widget _statCard(
+    bool isDark,
+    String value,
+    String label,
+    IconData icon,
+  ) {
+    return PremiumCard(
+      child: Column(
+        children: [
+          Icon(icon, color: AppTheme.primary),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: TextStyle(
+              color: isDark ? Colors.white : Colors.black87,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color:
+                  isDark ? Colors.white70 : Colors.black54,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _quickCard(
     BuildContext context,
+    bool isDark,
     IconData icon,
     String title,
-    String subtitle,
-    List<Color> colors,
     Widget page,
   ) {
     return GestureDetector(
       onTap: () => go(context, page),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          gradient:
-              const LinearGradient(
-            colors: [
-              Color(0xff111C44),
-              Color(0xff09122F),
-            ],
-          ),
-          borderRadius:
-              BorderRadius.circular(28),
-          boxShadow: [
-            BoxShadow(
-              color:
-                  colors.first.withOpacity(0.28),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
+      child: PremiumCard(
         child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding:
-                  const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: colors,
-                ),
-                borderRadius:
-                    BorderRadius.circular(18),
+                gradient: AppTheme.aiGradient,
+                borderRadius: BorderRadius.circular(20),
               ),
               child: Icon(
                 icon,
@@ -378,21 +333,13 @@ class HomePage extends StatelessWidget {
                 size: 28,
               ),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 16),
             Text(
               title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 15,
+              style: TextStyle(
+                color:
+                    isDark ? Colors.white : Colors.black87,
                 fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              subtitle,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 11,
               ),
             ),
           ],
@@ -401,7 +348,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget glow(double size, Color color) {
+  Widget _glow(double size, Color color) {
     return Container(
       width: size,
       height: size,

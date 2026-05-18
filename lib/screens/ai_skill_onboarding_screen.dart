@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dashboard_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+import 'dashboard_screen.dart';
+import '../theme/premium_ui.dart';
 
 class AiSkillOnboardingScreen extends StatefulWidget {
   final String username;
@@ -19,8 +21,7 @@ class AiSkillOnboardingScreen extends StatefulWidget {
       _AiSkillOnboardingScreenState();
 }
 
-class _AiSkillOnboardingScreenState
-    extends State<AiSkillOnboardingScreen> {
+class _AiSkillOnboardingScreenState extends State<AiSkillOnboardingScreen> {
   final String apiKey = dotenv.env['GROQ_API_KEY'] ?? '';
 
   final List<String> skills = [
@@ -68,15 +69,25 @@ class _AiSkillOnboardingScreenState
     loadExistingSkills();
   }
 
+  void showMsg(String msg) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: AppTheme.primary,
+      ),
+    );
+  }
+
   Future<void> loadExistingSkills() async {
     try {
-      final res = Supabase.instance.client
+      final data = await Supabase.instance.client
           .from('user_skills')
           .select()
           .eq('username', widget.username)
           .maybeSingle();
-
-      final data = await res;
 
       if (data != null) {
         selectedSkills.clear();
@@ -84,11 +95,9 @@ class _AiSkillOnboardingScreenState
           List<String>.from(data['skills'] ?? []),
         );
 
-        previewRole =
-            data['recommended_role'] ?? "";
+        previewRole = data['recommended_role'] ?? "";
 
-        salaryRange =
-            data['salary_range'] ?? "";
+        salaryRange = data['salary_range'] ?? "";
 
         aiSuggestions = List<String>.from(
           data['ai_suggestions'] ?? [],
@@ -101,11 +110,11 @@ class _AiSkillOnboardingScreenState
 
   Future<void> generateAIRecommendation() async {
     if (selectedSkills.isEmpty) {
-      previewRole = "";
-      salaryRange = "";
-      aiSuggestions = [];
-
-      if (mounted) setState(() {});
+      setState(() {
+        previewRole = "";
+        salaryRange = "";
+        aiSuggestions = [];
+      });
       return;
     }
 
@@ -116,8 +125,7 @@ class _AiSkillOnboardingScreenState
 Analyze these skills:
 ${selectedSkills.join(", ")}
 
-Return ONLY JSON:
-
+Return ONLY valid JSON:
 {
  "role":"Mobile App Developer",
  "salary":"₹6 LPA - ₹15 LPA",
@@ -140,15 +148,8 @@ Return ONLY JSON:
         body: jsonEncode({
           "model": "llama-3.3-70b-versatile",
           "messages": [
-            {
-              "role": "system",
-              "content":
-                  "Return only valid JSON."
-            },
-            {
-              "role": "user",
-              "content": prompt
-            }
+            {"role": "system", "content": "Return only valid JSON."},
+            {"role": "user", "content": prompt}
           ],
           "temperature": 0.7
         }),
@@ -157,8 +158,7 @@ Return ONLY JSON:
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
-        String aiText =
-            data['choices'][0]['message']['content'];
+        String aiText = data['choices'][0]['message']['content'];
 
         aiText = aiText.replaceAll("```json", "");
         aiText = aiText.replaceAll("```", "");
@@ -168,13 +168,11 @@ Return ONLY JSON:
 
         previewRole = parsed['role'];
         salaryRange = parsed['salary'];
-        aiSuggestions =
-            List<String>.from(parsed['suggestions']);
+        aiSuggestions = List<String>.from(parsed['suggestions']);
       }
     } catch (_) {
       previewRole = "Software Engineer";
       salaryRange = "₹5 LPA - ₹12 LPA";
-
       aiSuggestions = [
         "Build projects",
         "Practice DSA",
@@ -189,20 +187,14 @@ Return ONLY JSON:
 
   Future<void> saveSkills() async {
     if (selectedSkills.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Select at least one skill"),
-        ),
-      );
+      showMsg("Select at least one skill");
       return;
     }
 
     setState(() => loading = true);
 
     try {
-      await Supabase.instance.client
-          .from('user_skills')
-          .upsert({
+      await Supabase.instance.client.from('user_skills').upsert({
         'username': widget.username,
         'skills': selectedSkills,
         'recommended_role': previewRole,
@@ -218,17 +210,14 @@ Return ONLY JSON:
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (_) =>
-              DashboardScreen(username: widget.username),
+          builder: (_) => DashboardScreen(
+            username: widget.username,
+          ),
         ),
         (route) => false,
       );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error: $e"),
-        ),
-      );
+    } catch (_) {
+      showMsg("Failed to save profile");
     }
 
     if (mounted) {
@@ -239,12 +228,12 @@ Return ONLY JSON:
   Widget skillChip(String skill) {
     final selected = selectedSkills.contains(skill);
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: () async {
         setState(() {
-          selected
-              ? selectedSkills.remove(skill)
-              : selectedSkills.add(skill);
+          selected ? selectedSkills.remove(skill) : selectedSkills.add(skill);
         });
 
         await generateAIRecommendation();
@@ -256,24 +245,18 @@ Return ONLY JSON:
           vertical: 12,
         ),
         decoration: BoxDecoration(
-          gradient: selected
-              ? const LinearGradient(
-                  colors: [
-                    Color(0xff7F00FF),
-                    Color(0xffE100FF),
-                  ],
-                )
-              : null,
+          gradient: selected ? AppTheme.primaryGradient : null,
           color: selected
               ? null
-              : Colors.white.withOpacity(0.08),
+              : (isDark ? Colors.white10 : Colors.grey.shade200),
           borderRadius: BorderRadius.circular(30),
         ),
         child: Text(
           skill,
           style: TextStyle(
-            color:
-                selected ? Colors.white : Colors.white70,
+            color: selected
+                ? Colors.white
+                : (isDark ? Colors.white70 : Colors.black54),
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -282,25 +265,21 @@ Return ONLY JSON:
   }
 
   Widget suggestionCard(String text) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white10,
-        borderRadius: BorderRadius.circular(18),
-      ),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return PremiumCard(
       child: Row(
         children: [
           const Icon(
             Icons.auto_awesome,
             color: Colors.amber,
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: isDark ? Colors.white : Colors.black87,
               ),
             ),
           ),
@@ -311,117 +290,154 @@ Return ONLY JSON:
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xff040B2D),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(28),
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0xff7B2FF7),
-                    Color(0xff4A00E0),
-                  ],
-                ),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(35),
-                  bottomRight: Radius.circular(35),
-                ),
-              ),
-              child: Text(
-                "Build Your AI Profile 🚀",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+      backgroundColor: isDark ? AppTheme.darkBg : AppTheme.lightBg,
+      body: Stack(
+        children: [
+          Positioned(
+            top: -120,
+            left: -80,
+            child: _glow(
+              260,
+              AppTheme.primary.withOpacity(0.22),
             ),
-            if (previewRole.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xff30CFD0),
-                        Color(0xff330867),
+          ),
+          Positioned(
+            bottom: -140,
+            right: -100,
+            child: _glow(
+              300,
+              Colors.blue.withOpacity(0.10),
+            ),
+          ),
+          SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: PremiumCard(
+                    child: Column(
+                      children: [
+                        Container(
+                          height: 110,
+                          width: 110,
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            gradient: AppTheme.primaryGradient,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Image.asset(
+                            'assets/images/ai_robot.png',
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          "Build AI Profile",
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Select your skills for personalized AI recommendations",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: isDark ? Colors.white70 : Colors.black54,
+                          ),
+                        ),
                       ],
                     ),
-                    borderRadius:
-                        BorderRadius.circular(24),
-                  ),
-                  child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        previewRole,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight:
-                              FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        salaryRange,
-                        style: const TextStyle(
-                          color: Colors.amber,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
                   ),
                 ),
-              ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding:
-                    const EdgeInsets.symmetric(
-                  horizontal: 16,
-                ),
-                child: Column(
-                  children: [
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      children:
-                          skills.map(skillChip).toList(),
+                if (previewRole.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
                     ),
-                    const SizedBox(height: 20),
-                    ...aiSuggestions
-                        .map(suggestionCard)
-                        .toList(),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(18),
-              child: SizedBox(
-                width: double.infinity,
-                height: 58,
-                child: ElevatedButton(
-                  onPressed:
-                      loading ? null : saveSkills,
-                  child: loading
-                      ? const CircularProgressIndicator(
-                          color: Colors.white,
-                        )
-                      : const Text(
-                          "Save & Continue",
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: AppTheme.primaryGradient,
+                        borderRadius: BorderRadius.circular(26),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            previewRole,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            salaryRange,
+                            style: const TextStyle(
+                              color: Colors.amber,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 18),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                    ),
+                    child: Column(
+                      children: [
+                        Wrap(
+                          spacing: 12,
+                          runSpacing: 12,
+                          children: skills.map(skillChip).toList(),
                         ),
+                        const SizedBox(height: 20),
+                        ...aiSuggestions.map(
+                          suggestionCard,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: PremiumButton(
+                      text: loading ? "Saving..." : "Save & Continue",
+                      icon: Icons.arrow_forward,
+                      onTap: loading ? () {} : saveSkills,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _glow(
+    double size,
+    Color color,
+  ) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color,
       ),
     );
   }

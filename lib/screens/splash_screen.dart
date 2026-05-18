@@ -1,36 +1,18 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:animated_splash_screen/animated_splash_screen.dart';
-import 'package:page_transition/page_transition.dart';
-import 'login_screen.dart';
+import '../services/auth_gate.dart';
+import '../theme/premium_ui.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return AnimatedSplashScreen(
-      duration: 4200,
-      splashIconSize: double.infinity,
-      backgroundColor: Colors.black,
-      nextScreen: const LoginScreen(),
-      pageTransitionType: PageTransitionType.fade,
-      animationDuration: const Duration(milliseconds: 1400),
-      splash: const PremiumSplashBody(),
-    );
-  }
+  State<SplashScreen> createState() =>
+      _SplashScreenState();
 }
 
-class PremiumSplashBody extends StatefulWidget {
-  const PremiumSplashBody({super.key});
-
-  @override
-  State<PremiumSplashBody> createState() =>
-      _PremiumSplashBodyState();
-}
-
-class _PremiumSplashBodyState
-    extends State<PremiumSplashBody>
+class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
   late AnimationController pulseController;
   late AnimationController rotateController;
@@ -100,6 +82,20 @@ class _PremiumSplashBodyState
     rotateController.repeat();
     floatController.repeat(reverse: true);
     textController.forward();
+
+    Timer(
+      const Duration(seconds: 4),
+      () {
+        if (!mounted) return;
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const AuthGate(),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -128,7 +124,7 @@ class _PremiumSplashBodyState
           color: color,
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.45),
+              color: color.withOpacity(0.35),
               blurRadius: 90,
               spreadRadius: 18,
             ),
@@ -153,7 +149,7 @@ class _PremiumSplashBodyState
             width: size,
             height: size,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.10),
+              color: Colors.white.withOpacity(0.08),
               shape: BoxShape.circle,
             ),
           ),
@@ -162,80 +158,64 @@ class _PremiumSplashBodyState
     );
   }
 
-  Widget animatedAIIcon() {
+  Widget animatedRobot() {
     return AnimatedBuilder(
       animation: Listenable.merge([
         pulseAnim,
         rotateAnim,
+        floatAnim,
       ]),
       builder: (_, __) {
-        return Transform.scale(
-          scale: pulseAnim.value,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Transform.rotate(
-                angle: rotateAnim.value,
-                child: Container(
-                  width: 210,
-                  height: 210,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: SweepGradient(
-                      colors: [
-                        Colors.deepPurple.withOpacity(0.0),
-                        Colors.deepPurple,
-                        Colors.pinkAccent,
-                        Colors.cyan,
-                        Colors.deepPurple.withOpacity(0.0),
-                      ],
+        return Transform.translate(
+          offset: Offset(0, floatAnim.value),
+          child: Transform.scale(
+            scale: pulseAnim.value,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Transform.rotate(
+                  angle: rotateAnim.value,
+                  child: Container(
+                    width: 250,
+                    height: 250,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: SweepGradient(
+                        colors: [
+                          Colors.transparent,
+                          Colors.cyanAccent,
+                          Colors.deepPurpleAccent,
+                          Colors.pinkAccent,
+                          Colors.transparent,
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-
-              Transform.rotate(
-                angle: -rotateAnim.value,
-                child: Container(
-                  width: 145,
-                  height: 145,
+                Container(
+                  width: 170,
+                  height: 170,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.18),
-                      width: 2,
-                    ),
-                  ),
-                ),
-              ),
-
-              Container(
-                width: 105,
-                height: 105,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: const LinearGradient(
-                    colors: [
-                      Colors.deepPurple,
-                      Colors.pinkAccent,
-                      Colors.cyan,
+                    boxShadow: [
+                      BoxShadow(
+                        color:
+                            Colors.cyan.withOpacity(0.25),
+                        blurRadius: 40,
+                        spreadRadius: 10,
+                      ),
                     ],
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.deepPurple.withOpacity(0.5),
-                      blurRadius: 35,
-                      spreadRadius: 10,
-                    ),
-                  ],
                 ),
-                child: const Icon(
-                  Icons.auto_awesome,
-                  size: 50,
-                  color: Colors.white,
+                SizedBox(
+                  width: 130,
+                  height: 130,
+                  child: Image.asset(
+                    'assets/icon/ai_robot.png',
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -245,6 +225,7 @@ class _PremiumSplashBodyState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.darkBg,
       body: Stack(
         children: [
           Container(
@@ -287,15 +268,15 @@ class _PremiumSplashBodyState
           floatingParticle(220, 310, 10),
           floatingParticle(420, 90, 12),
           floatingParticle(540, 280, 16),
-          floatingParticle(660, 170, 9),
 
           Center(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment:
+                  MainAxisAlignment.center,
               children: [
-                animatedAIIcon(),
+                animatedRobot(),
 
-                const SizedBox(height: 55),
+                const SizedBox(height: 50),
 
                 AnimatedBuilder(
                   animation: textAnim,
@@ -315,9 +296,9 @@ class _PremiumSplashBodyState
                           "AI Placement App",
                           style: TextStyle(
                             fontSize: 34,
-                            fontWeight: FontWeight.bold,
+                            fontWeight:
+                                FontWeight.bold,
                             color: Colors.white,
-                            letterSpacing: 1.3,
                           ),
                         ),
                       ),
@@ -325,19 +306,21 @@ class _PremiumSplashBodyState
                   },
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
 
                 AnimatedBuilder(
                   animation: floatAnim,
                   builder: (_, __) {
                     return Transform.translate(
-                      offset: Offset(0, floatAnim.value),
+                      offset: Offset(
+                        0,
+                        floatAnim.value,
+                      ),
                       child: const Text(
                         "AI Powered Career Growth Platform",
                         style: TextStyle(
                           color: Colors.white70,
-                          fontSize: 16,
-                          letterSpacing: 0.9,
+                          fontSize: 15,
                         ),
                       ),
                     );
@@ -350,20 +333,9 @@ class _PremiumSplashBodyState
                   width: 170,
                   height: 6,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    gradient: const LinearGradient(
-                      colors: [
-                        Colors.deepPurple,
-                        Colors.pinkAccent,
-                        Colors.cyan,
-                      ],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.purple.withOpacity(0.45),
-                        blurRadius: 20,
-                      ),
-                    ],
+                    borderRadius:
+                        BorderRadius.circular(20),
+                    gradient: AppTheme.primaryGradient,
                   ),
                 ),
               ],

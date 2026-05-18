@@ -15,7 +15,9 @@ import 'ai_career_guidance_screen.dart';
 import 'profile_screen.dart';
 import 'notifications_screen.dart';
 import 'home_page.dart';
+
 import '../theme/premium_ui.dart';
+import '../theme/theme_controller.dart';
 
 class DashboardScreen extends StatefulWidget {
   final String username;
@@ -36,7 +38,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String aiRole = "AI Engineer";
   List<String> skills = [];
   bool faceLock = false;
-  bool darkMode = true;
   bool loading = true;
 
   @override
@@ -79,7 +80,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     setState(() {
       faceLock = prefs.getBool('face_lock') ?? false;
-      darkMode = prefs.getBool('dark_mode') ?? true;
     });
   }
 
@@ -107,6 +107,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
 
     final prefs = await SharedPreferences.getInstance();
+
     await prefs.setBool('face_lock', v);
 
     if (!mounted) return;
@@ -114,20 +115,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     setState(() => faceLock = v);
   }
 
-  Future<void> toggleDark(bool v) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('dark_mode', v);
-
-    if (!mounted) return;
-
-    setState(() => darkMode = v);
-  }
-
   Future<void> loadAiData() async {
     try {
       final res = await Supabase.instance.client
           .from('user_skills')
-          .select('recommended_role, skills')
+          .select(
+            'recommended_role, skills',
+          )
           .eq('username', widget.username)
           .maybeSingle();
 
@@ -135,17 +129,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       setState(() {
         aiRole = res?['recommended_role'] ?? "AI Engineer";
-        skills = List<String>.from(res?['skills'] ?? []);
+
+        skills = List<String>.from(
+          res?['skills'] ?? [],
+        );
       });
     } catch (_) {}
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     if (loading) {
-      return const Scaffold(
-        backgroundColor: AppTheme.darkBg,
-        body: Center(
+      return Scaffold(
+        backgroundColor: isDark ? AppTheme.darkBg : AppTheme.lightBg,
+        body: const Center(
           child: CircularProgressIndicator(
             color: AppTheme.primary,
           ),
@@ -153,47 +152,168 @@ class _DashboardScreenState extends State<DashboardScreen> {
       );
     }
 
+    final pages = [
+      HomePage(
+        username: widget.username,
+        skills: skills,
+      ),
+      _explorePage(),
+      ProfileScreen(
+        username: widget.username,
+        aiRole: aiRole,
+        faceLock: faceLock,
+        onToggleFace: toggleFace,
+      ),
+    ];
+
     return Scaffold(
-      backgroundColor: AppTheme.darkBg,
-      body: IndexedStack(
-        index: index,
+      backgroundColor: isDark ? AppTheme.darkBg : AppTheme.lightBg,
+      body: Stack(
         children: [
-          HomePage(
-            username: widget.username,
-            skills: skills,
+          IndexedStack(
+            index: index,
+            children: pages,
           ),
-          _explorePage(),
-          ProfileScreen(
-            username: widget.username,
-            aiRole: aiRole,
-            faceLock: faceLock,
-            onToggleFace: toggleFace,
+          Positioned(
+            top: 55,
+            right: 20,
+            child: SafeArea(
+              child: _topThemeButton(),
+            ),
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xff070E38),
-        currentIndex: index,
-        selectedItemColor: AppTheme.primary,
-        unselectedItemColor: Colors.white54,
-        type: BottomNavigationBarType.fixed,
-        onTap: (i) {
-          setState(() => index = i);
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_rounded),
-            label: "Home",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.grid_view_rounded),
-            label: "Explore",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_rounded),
-            label: "Profile",
+      bottomNavigationBar: _premiumBottomNav(isDark),
+    );
+  }
+
+  Widget _premiumBottomNav(bool isDark) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(
+        16,
+        0,
+        16,
+        20,
+      ),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        gradient: isDark
+            ? const LinearGradient(
+                colors: [
+                  Color(0xff111C44),
+                  Color(0xff09122F),
+                ],
+              )
+            : const LinearGradient(
+                colors: [
+                  Colors.white,
+                  Color(0xffF7F8FC),
+                ],
+              ),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primary.withOpacity(0.15),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
+      ),
+      child: Row(
+        children: [
+          _navItem(
+            Icons.home_rounded,
+            "Home",
+            0,
+          ),
+          _navItem(
+            Icons.grid_view_rounded,
+            "Explore",
+            1,
+          ),
+          _navItem(
+            Icons.person_rounded,
+            "Profile",
+            2,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _navItem(
+    IconData icon,
+    String label,
+    int itemIndex,
+  ) {
+    final selected = index == itemIndex;
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => index = itemIndex),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          padding: const EdgeInsets.symmetric(
+            vertical: 14,
+          ),
+          decoration: BoxDecoration(
+            gradient: selected ? AppTheme.primaryGradient : null,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                color: selected
+                    ? Colors.white
+                    : (isDark ? Colors.white54 : Colors.black54),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: selected
+                      ? Colors.white
+                      : (isDark ? Colors.white54 : Colors.black54),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _topThemeButton() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return GestureDetector(
+      onTap: () {
+        themeController.toggleTheme();
+        setState(() {});
+      },
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          gradient: AppTheme.aiGradient,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primary.withOpacity(0.25),
+              blurRadius: 18,
+            ),
+          ],
+        ),
+        child: Icon(
+          isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+          color: Colors.white,
+          size: 22,
+        ),
       ),
     );
   }
@@ -202,63 +322,70 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final items = [
       {
         "title": "Resume",
-        "subtitle": "Upload & analyze",
         "icon": Icons.upload_file,
-        "page": ResumeUploadScreen(username: widget.username),
+        "page": ResumeUploadScreen(
+          username: widget.username,
+        ),
       },
       {
         "title": "Score",
-        "subtitle": "ATS Resume Score",
         "icon": Icons.verified,
-        "page": ResumeScoreScreen(username: widget.username),
+        "page": ResumeScoreScreen(
+          username: widget.username,
+        ),
       },
       {
         "title": "Jobs",
-        "subtitle": "Find opportunities",
         "icon": Icons.work,
-        "page": JobsScreen(username: widget.username),
+        "page": JobsScreen(
+          username: widget.username,
+        ),
       },
       {
         "title": "History",
-        "subtitle": "Track applications",
         "icon": Icons.history,
-        "page": ApplicationHistoryScreen(username: widget.username),
+        "page": ApplicationHistoryScreen(
+          username: widget.username,
+        ),
       },
       {
         "title": "Chatbot",
-        "subtitle": "AI Assistant",
         "icon": Icons.smart_toy,
         "page": const ChatbotScreen(),
       },
       {
         "title": "Interview",
-        "subtitle": "Mock Practice",
         "icon": Icons.mic,
-        "page": InterviewScreen(username: widget.username),
+        "page": InterviewScreen(
+          username: widget.username,
+        ),
       },
       {
         "title": "Coding",
-        "subtitle": "Coding Round",
         "icon": Icons.code,
-        "page": CodingInterviewScreen(username: widget.username),
+        "page": CodingInterviewScreen(
+          username: widget.username,
+        ),
       },
       {
         "title": "Career AI",
-        "subtitle": "Roadmap & guidance",
         "icon": Icons.psychology,
-        "page": AICareerGuidanceScreen(username: widget.username),
+        "page": AICareerGuidanceScreen(
+          username: widget.username,
+        ),
       },
       {
-        "title": "Notifications",
-        "subtitle": "Latest alerts",
+        "title": "Alerts",
         "icon": Icons.notifications,
-        "page": NotificationsScreen(username: widget.username),
+        "page": NotificationsScreen(
+          username: widget.username,
+        ),
       },
     ];
 
     return PremiumScreen(
       title: "Explore",
-      subtitle: "All AI placement tools",
+      subtitle: "AI placement toolkit",
       icon: Icons.dashboard_customize,
       child: GridView.builder(
         shrinkWrap: true,
@@ -273,11 +400,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
         itemBuilder: (_, i) {
           final item = items[i];
 
-          return PremiumTile(
-            title: item['title'] as String,
-            icon: item['icon'] as IconData,
-            color: AppTheme.primary,
+          return GestureDetector(
             onTap: () => _go(item['page'] as Widget),
+            child: PremiumCard(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: AppTheme.primaryGradient,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Icon(
+                      item['icon'] as IconData,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    item['title'] as String,
+                    style: TextStyle(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : Colors.black87,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           );
         },
       ),

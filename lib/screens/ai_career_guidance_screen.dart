@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import '../theme/premium_ui.dart';
+
 class AICareerGuidanceScreen extends StatefulWidget {
   final String username;
 
@@ -42,14 +44,15 @@ class _AICareerGuidanceScreenState
     try {
       final res = await Supabase.instance.client
           .from('user_skills')
-          .select()
+          .select('username, skills, recommended_role')
           .eq('username', widget.username)
           .maybeSingle();
 
       if (res != null) {
         skills = res['skills'] ?? [];
         role =
-            res['recommended_role'] ?? "Software Engineer";
+            res['recommended_role'] ??
+                "Software Engineer";
       }
 
       await generateAIPlan();
@@ -58,22 +61,19 @@ class _AICareerGuidanceScreenState
     }
 
     if (mounted) {
-      setState(() {
-        loading = false;
-      });
+      setState(() => loading = false);
     }
   }
 
   Future<void> generateAIPlan() async {
     try {
       final prompt = """
-Generate career guidance for:
+Generate AI career guidance.
 
 Role: $role
 Skills: ${skills.join(", ")}
 
-Return ONLY JSON:
-
+Return ONLY valid JSON:
 {
  "missing_skills":["skill1"],
  "roadmap":["step1"],
@@ -98,14 +98,13 @@ Return ONLY JSON:
             {
               "role": "system",
               "content":
-                  "Return only valid JSON career guidance."
+                  "Return only valid JSON."
             },
             {
               "role": "user",
               "content": prompt
             }
-          ],
-          "temperature": 0.7
+          ]
         }),
       );
 
@@ -123,10 +122,12 @@ Return ONLY JSON:
 
         missingSkills =
             List<String>.from(parsed['missing_skills']);
-        roadmap = List<String>.from(parsed['roadmap']);
+        roadmap =
+            List<String>.from(parsed['roadmap']);
         certifications =
             List<String>.from(parsed['certifications']);
-        projects = List<String>.from(parsed['projects']);
+        projects =
+            List<String>.from(parsed['projects']);
         interviewTips =
             List<String>.from(parsed['interview_tips']);
         salaryRange = parsed['salary_range'];
@@ -142,7 +143,7 @@ Return ONLY JSON:
     missingSkills = [
       "DSA",
       "System Design",
-      "API Integration"
+      "API Integration",
     ];
 
     roadmap = [
@@ -150,73 +151,41 @@ Return ONLY JSON:
       "Build real projects",
       "Practice coding interviews",
       "Learn system design",
-      "Apply for internships"
+      "Apply for internships",
     ];
 
     certifications = [
       "AWS Cloud Practitioner",
-      "Flutter Certification"
+      "Flutter Certification",
     ];
 
     projects = [
       "E-commerce App",
       "Chatbot App",
-      "AI Resume Analyzer"
+      "AI Resume Analyzer",
     ];
 
     interviewTips = [
       "Practice mock interviews",
       "Improve communication",
-      "Solve coding questions daily"
+      "Solve coding questions daily",
     ];
 
     salaryRange = "₹5 LPA - ₹12 LPA";
   }
 
-  Widget glassCard({required Widget child}) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.white.withOpacity(0.10),
-            Colors.white.withOpacity(0.04),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: child,
-    );
-  }
-
-  Widget sectionTitle(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 22,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-  }
-
-  Widget skillChip(String skill) {
+  Widget chip(String text) {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: 14,
         vertical: 10,
       ),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xff7B2FF7),
-            Color(0xff4A00E0),
-          ],
-        ),
+        gradient: AppTheme.primaryGradient,
         borderRadius: BorderRadius.circular(24),
       ),
       child: Text(
-        skill,
+        text,
         style: const TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.w600,
@@ -225,27 +194,34 @@ Return ONLY JSON:
     );
   }
 
-  Widget listCard(String text, int index) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xff111C44),
-            Color(0xff09122F),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(22),
+  Widget sectionTitle(String title) {
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark;
+
+    return Text(
+      title,
+      style: TextStyle(
+        color:
+            isDark ? Colors.white : Colors.black87,
+        fontSize: 22,
+        fontWeight: FontWeight.bold,
       ),
+    );
+  }
+
+  Widget listCard(String text, int index) {
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark;
+
+    return PremiumCard(
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: Colors.white,
+            backgroundColor: AppTheme.primary,
             child: Text(
               "${index + 1}",
               style: const TextStyle(
-                color: Colors.deepPurple,
+                color: Colors.white,
               ),
             ),
           ),
@@ -253,8 +229,11 @@ Return ONLY JSON:
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: isDark
+                    ? Colors.white
+                    : Colors.black87,
+                height: 1.5,
               ),
             ),
           ),
@@ -264,125 +243,148 @@ Return ONLY JSON:
   }
 
   Widget listSection(
-      String title, List<String> items) {
+    String title,
+    List<String> items,
+  ) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment:
+          CrossAxisAlignment.start,
       children: [
         sectionTitle(title),
         const SizedBox(height: 14),
         ...items
             .asMap()
             .entries
-            .map((e) => listCard(e.value, e.key)),
+            .map(
+              (e) => listCard(
+                e.value,
+                e.key,
+              ),
+            ),
       ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xff040B2D),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: const Text(
-          "AI Career Guidance",
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
-      body: loading
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark;
+
+    return PremiumScreen(
+      title: "AI Career Guidance",
+      subtitle: "Your personalized AI roadmap",
+      icon: Icons.psychology_alt,
+      scrollable: true,
+      child: loading
           ? const Center(
-              child: CircularProgressIndicator(
-                color: Colors.deepPurpleAccent,
+              child: Padding(
+                padding: EdgeInsets.all(40),
+                child: CircularProgressIndicator(
+                  color: AppTheme.primary,
+                ),
               ),
             )
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xff30CFD0),
-                          Color(0xff330867),
-                        ],
+          : Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: AppTheme.primaryGradient,
+                    borderRadius:
+                        BorderRadius.circular(30),
+                  ),
+                  child: Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Recommended Career",
+                        style: TextStyle(
+                          color: Colors.white70,
+                        ),
                       ),
-                      borderRadius:
-                          BorderRadius.circular(30),
-                    ),
-                    child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Recommended Career",
-                          style: TextStyle(
-                            color: Colors.white70,
-                          ),
+                      const SizedBox(height: 8),
+                      Text(
+                        role,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 26,
+                          fontWeight:
+                              FontWeight.bold,
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          role,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 26,
-                            fontWeight:
-                                FontWeight.bold,
-                          ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        salaryRange,
+                        style: const TextStyle(
+                          color: Colors.amber,
+                          fontSize: 18,
+                          fontWeight:
+                              FontWeight.bold,
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          salaryRange,
-                          style: const TextStyle(
-                            color: Colors.amber,
-                            fontSize: 18,
-                            fontWeight:
-                                FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 24),
-                  sectionTitle("Your Skills"),
-                  const SizedBox(height: 14),
-                  glassCard(
-                    child: Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children: skills
-                          .map((e) =>
-                              skillChip(e.toString()))
-                          .toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  sectionTitle("Missing Skills"),
-                  const SizedBox(height: 14),
-                  Wrap(
+                ),
+
+                const SizedBox(height: 24),
+
+                sectionTitle("Your Skills"),
+                const SizedBox(height: 14),
+
+                PremiumCard(
+                  child: Wrap(
                     spacing: 10,
                     runSpacing: 10,
-                    children:
-                        missingSkills.map(skillChip).toList(),
+                    children: skills
+                        .map(
+                          (e) => chip(
+                            e.toString(),
+                          ),
+                        )
+                        .toList(),
                   ),
-                  const SizedBox(height: 28),
-                  listSection("AI Roadmap", roadmap),
-                  const SizedBox(height: 20),
-                  listSection(
-                      "Recommended Certifications",
-                      certifications),
-                  const SizedBox(height: 20),
-                  listSection(
-                      "Project Suggestions", projects),
-                  const SizedBox(height: 20),
-                  listSection(
-                      "Interview Tips", interviewTips),
-                ],
-              ),
+                ),
+
+                const SizedBox(height: 24),
+
+                sectionTitle("Missing Skills"),
+                const SizedBox(height: 14),
+
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children:
+                      missingSkills.map(chip).toList(),
+                ),
+
+                const SizedBox(height: 28),
+
+                listSection("AI Roadmap", roadmap),
+                const SizedBox(height: 20),
+
+                listSection(
+                  "Recommended Certifications",
+                  certifications,
+                ),
+
+                const SizedBox(height: 20),
+
+                listSection(
+                  "Project Suggestions",
+                  projects,
+                ),
+
+                const SizedBox(height: 20),
+
+                listSection(
+                  "Interview Tips",
+                  interviewTips,
+                ),
+              ],
             ),
     );
   }

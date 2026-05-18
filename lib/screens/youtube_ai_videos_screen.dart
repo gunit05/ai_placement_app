@@ -16,12 +16,10 @@ class YoutubeAiVideosScreen extends StatefulWidget {
   });
 
   @override
-  State<YoutubeAiVideosScreen> createState() =>
-      _YoutubeAiVideosScreenState();
+  State<YoutubeAiVideosScreen> createState() => _YoutubeAiVideosScreenState();
 }
 
-class _YoutubeAiVideosScreenState
-    extends State<YoutubeAiVideosScreen> {
+class _YoutubeAiVideosScreenState extends State<YoutubeAiVideosScreen> {
   final String apiKey = dotenv.env['GROQ_API_KEY 2'] ?? '';
 
   final supabase = Supabase.instance.client;
@@ -55,12 +53,7 @@ class _YoutubeAiVideosScreenState
       }
 
       if (skills.isEmpty) {
-        skills = [
-          "Flutter",
-          "DSA",
-          "Aptitude",
-          "HR Interview"
-        ];
+        skills = ["Flutter", "DSA", "Aptitude", "HR Interview"];
       }
 
       final prompt = """
@@ -74,7 +67,6 @@ Mix:
 - project tutorials
 
 Return ONLY JSON:
-
 [
  {
    "title":"Flutter Interview Questions",
@@ -97,13 +89,9 @@ Return ONLY JSON:
           "messages": [
             {
               "role": "system",
-              "content":
-                  "Return only valid JSON video recommendations."
+              "content": "Return only valid JSON video recommendations."
             },
-            {
-              "role": "user",
-              "content": prompt
-            }
+            {"role": "user", "content": prompt}
           ],
           "temperature": 0.7
         }),
@@ -112,8 +100,7 @@ Return ONLY JSON:
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
-        String aiText =
-            data['choices'][0]['message']['content'];
+        String aiText = data['choices'][0]['message']['content'];
 
         aiText = aiText.replaceAll("```json", "");
         aiText = aiText.replaceAll("```", "");
@@ -121,8 +108,7 @@ Return ONLY JSON:
 
         final parsed = jsonDecode(aiText);
 
-        allVideos =
-            List<Map<String, dynamic>>.from(parsed);
+        allVideos = List<Map<String, dynamic>>.from(parsed);
       } else {
         throw Exception();
       }
@@ -154,9 +140,7 @@ Return ONLY JSON:
     filteredVideos = allVideos;
 
     if (mounted) {
-      setState(() {
-        loading = false;
-      });
+      setState(() => loading = false);
     }
   }
 
@@ -179,10 +163,8 @@ Return ONLY JSON:
     final url =
         'https://www.youtube.com/results?search_query=${Uri.encodeComponent(query)}';
 
-    final uri = Uri.parse(url);
-
     await launchUrl(
-      uri,
+      Uri.parse(url),
       mode: LaunchMode.externalApplication,
     );
   }
@@ -191,6 +173,17 @@ Return ONLY JSON:
   void dispose() {
     searchController.dispose();
     super.dispose();
+  }
+
+  Widget _glow(double size, Color color) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color,
+      ),
+    );
   }
 
   @override
@@ -215,6 +208,20 @@ Return ONLY JSON:
               Colors.purpleAccent.withOpacity(0.18),
             ),
           ),
+          Positioned(
+            right: -40,
+            bottom: 120,
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: 0.06,
+                child: Image.asset(
+                  'assets/images/ai_robot.png',
+                  width: 280,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ),
           SafeArea(
             child: Column(
               children: [
@@ -227,13 +234,10 @@ Return ONLY JSON:
                           GestureDetector(
                             onTap: () => Navigator.pop(context),
                             child: Container(
-                              padding:
-                                  const EdgeInsets.all(14),
+                              padding: const EdgeInsets.all(14),
                               decoration: BoxDecoration(
                                 color: Colors.white10,
-                                borderRadius:
-                                    BorderRadius.circular(
-                                        18),
+                                borderRadius: BorderRadius.circular(18),
                               ),
                               child: const Icon(
                                 Icons.arrow_back_ios_new,
@@ -247,8 +251,7 @@ Return ONLY JSON:
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 28,
-                              fontWeight:
-                                  FontWeight.bold,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                           const Spacer(),
@@ -257,18 +260,15 @@ Return ONLY JSON:
                       const SizedBox(height: 24),
                       Container(
                         width: double.infinity,
-                        padding:
-                            const EdgeInsets.all(24),
+                        padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
-                          gradient:
-                              const LinearGradient(
+                          gradient: const LinearGradient(
                             colors: [
                               Color(0xffFF0000),
                               Color(0xff7B2FF7),
                             ],
                           ),
-                          borderRadius:
-                              BorderRadius.circular(30),
+                          borderRadius: BorderRadius.circular(30),
                         ),
                         child: const Column(
                           children: [
@@ -283,8 +283,7 @@ Return ONLY JSON:
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 24,
-                                fontWeight:
-                                    FontWeight.bold,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
@@ -299,8 +298,7 @@ Return ONLY JSON:
                         ),
                         decoration: InputDecoration(
                           hintText: "Search videos...",
-                          hintStyle:
-                              const TextStyle(
+                          hintStyle: const TextStyle(
                             color: Colors.white54,
                           ),
                           prefixIcon: const Icon(
@@ -309,13 +307,9 @@ Return ONLY JSON:
                           ),
                           filled: true,
                           fillColor: Colors.white10,
-                          border:
-                              OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(
-                                    22),
-                            borderSide:
-                                BorderSide.none,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(22),
+                            borderSide: BorderSide.none,
                           ),
                         ),
                       ),
@@ -325,113 +319,74 @@ Return ONLY JSON:
                 Expanded(
                   child: loading
                       ? const Center(
-                          child:
-                              CircularProgressIndicator(
+                          child: CircularProgressIndicator(
                             color: Colors.white,
                           ),
                         )
                       : ListView.builder(
-                          padding:
-                              const EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: 20,
                           ),
-                          itemCount:
-                              filteredVideos.length,
+                          itemCount: filteredVideos.length,
                           itemBuilder: (_, i) {
-                            final video =
-                                filteredVideos[i];
+                            final video = filteredVideos[i];
 
                             return Padding(
-                              padding:
-                                  const EdgeInsets.only(
-                                      bottom: 16),
+                              padding: const EdgeInsets.only(bottom: 16),
                               child: GestureDetector(
-                                onTap: () =>
-                                    openVideo(
+                                onTap: () => openVideo(
                                   video['query'],
                                 ),
                                 child: Container(
-                                  padding:
-                                      const EdgeInsets
-                                          .all(18),
-                                  decoration:
-                                      BoxDecoration(
-                                    gradient:
-                                        const LinearGradient(
+                                  padding: const EdgeInsets.all(18),
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
                                       colors: [
-                                        Color(
-                                            0xff111C44),
-                                        Color(
-                                            0xff09122F),
+                                        Color(0xff111C44),
+                                        Color(0xff09122F),
                                       ],
                                     ),
-                                    borderRadius:
-                                        BorderRadius
-                                            .circular(
-                                                26),
+                                    borderRadius: BorderRadius.circular(26),
                                   ),
                                   child: Row(
                                     children: [
                                       Container(
-                                        padding:
-                                            const EdgeInsets
-                                                .all(
-                                                16),
-                                        decoration:
-                                            BoxDecoration(
-                                          gradient:
-                                              const LinearGradient(
+                                        padding: const EdgeInsets.all(16),
+                                        decoration: BoxDecoration(
+                                          gradient: const LinearGradient(
                                             colors: [
                                               Colors.red,
-                                              Colors
-                                                  .pink,
+                                              Colors.pink,
                                             ],
                                           ),
                                           borderRadius:
-                                              BorderRadius
-                                                  .circular(
-                                                      18),
+                                              BorderRadius.circular(18),
                                         ),
-                                        child:
-                                            const Icon(
-                                          Icons
-                                              .play_arrow,
-                                          color: Colors
-                                              .white,
+                                        child: const Icon(
+                                          Icons.play_arrow,
+                                          color: Colors.white,
                                           size: 30,
                                         ),
                                       ),
-                                      const SizedBox(
-                                          width: 16),
+                                      const SizedBox(width: 16),
                                       Expanded(
                                         child: Column(
                                           crossAxisAlignment:
-                                              CrossAxisAlignment
-                                                  .start,
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              video[
-                                                  'title'],
-                                              style:
-                                                  const TextStyle(
-                                                color: Colors
-                                                    .white,
-                                                fontWeight:
-                                                    FontWeight.bold,
-                                                fontSize:
-                                                    18,
+                                              video['title'],
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18,
                                               ),
                                             ),
-                                            const SizedBox(
-                                                height:
-                                                    6),
+                                            const SizedBox(height: 6),
                                             Text(
-                                              video[
-                                                  'channel'],
-                                              style:
-                                                  const TextStyle(
-                                                color: Colors
-                                                    .white70,
+                                              video['channel'],
+                                              style: const TextStyle(
+                                                color: Colors.white70,
                                               ),
                                             ),
                                           ],
@@ -449,17 +404,6 @@ Return ONLY JSON:
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _glow(double size, Color color) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
       ),
     );
   }

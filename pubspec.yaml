@@ -73,8 +73,9 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icon/icon.png
-  
-
+    - .env
+    - assets/icon/google.png
+    - assets/icon/ai_robot.png
 flutter_icons:
   android: true
   ios: true

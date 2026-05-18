@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../theme/premium_ui.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+import '../theme/premium_ui.dart';
 
 class ChatbotScreen extends StatefulWidget {
   const ChatbotScreen({super.key});
@@ -27,29 +28,34 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     },
     {
       "keywords": ["job", "career"],
-      "answer": "Go to Jobs section and apply for suitable opportunities."
+      "answer":
+          "Go to Jobs section and apply for suitable opportunities."
     },
     {
       "keywords": ["resume"],
-      "answer": "Upload your resume for AI analysis & ATS scoring."
+      "answer":
+          "Upload your resume for AI analysis and ATS scoring."
     },
     {
       "keywords": ["interview"],
-      "answer": "Use AI Interview module for mock interview practice."
+      "answer":
+          "Use AI mock interview module for realistic practice."
     },
     {
       "keywords": ["skills"],
-      "answer": "Add skills in profile for better recommendations."
+      "answer":
+          "Add your skills for better AI recommendations."
     },
     {
-      "keywords": ["what can you do", "who are you"],
+      "keywords": ["who are you", "what can you do"],
       "answer":
-          "I can help with jobs, interviews, aptitude, resume & career guidance."
+          "I help with jobs, resumes, interviews, aptitude and career guidance."
     },
   ];
 
   String? getSmartReply(String userMsg) {
     final msg = userMsg.toLowerCase();
+
     int bestScore = 0;
     String bestAnswer = "";
 
@@ -86,7 +92,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     final manualReply = getSmartReply(text);
 
     if (manualReply != null) {
-      await Future.delayed(const Duration(milliseconds: 700));
+      await Future.delayed(
+        const Duration(milliseconds: 700),
+      );
 
       if (!mounted) return;
 
@@ -101,7 +109,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('https://api.groq.com/openai/v1/chat/completions'),
+        Uri.parse(
+          'https://api.groq.com/openai/v1/chat/completions',
+        ),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $apiKey',
@@ -112,7 +122,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             {
               "role": "system",
               "content":
-                  "You are an AI career guidance assistant for placement app. Help users with jobs, resume, interviews, aptitude, coding, and career guidance."
+                  "You are an AI placement assistant. Help with careers, jobs, interviews, resume review, aptitude and skill guidance. Keep responses concise and helpful."
             },
             {
               "role": "user",
@@ -128,7 +138,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final aiReply = data['choices'][0]['message']['content'];
+        final aiReply =
+            data['choices'][0]['message']['content'];
 
         setState(() {
           messages.add({"bot": aiReply});
@@ -136,16 +147,17 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       } else {
         setState(() {
           messages.add({
-            "bot": "API Error ${response.statusCode}\n${response.body}"
+            "bot":
+                "API Error ${response.statusCode}"
           });
         });
       }
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
 
       setState(() {
         messages.add({
-          "bot": "Connection Error: $e",
+          "bot": "Connection failed. Try again."
         });
       });
     } finally {
@@ -160,43 +172,62 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   }
 
   void scrollDown() {
-    Future.delayed(const Duration(milliseconds: 150), () {
-      if (!scrollController.hasClients) return;
+    Future.delayed(
+      const Duration(milliseconds: 150),
+      () {
+        if (!scrollController.hasClients) return;
 
-      scrollController.animateTo(
-        scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeOut,
-      );
-    });
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeOut,
+        );
+      },
+    );
   }
 
   Widget buildBubble(String text, bool isBot) {
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark;
+
     return Align(
-      alignment: isBot ? Alignment.centerLeft : Alignment.centerRight,
+      alignment: isBot
+          ? Alignment.centerLeft
+          : Alignment.centerRight,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
         padding: const EdgeInsets.all(16),
-        constraints: const BoxConstraints(maxWidth: 300),
+        constraints:
+            const BoxConstraints(maxWidth: 300),
         decoration: BoxDecoration(
           gradient: isBot
-              ? const LinearGradient(
-                  colors: [AppTheme.card1, AppTheme.card2],
+              ? LinearGradient(
+                  colors: isDark
+                      ? [
+                          AppTheme.darkCard,
+                          AppTheme.darkCard2,
+                        ]
+                      : [
+                          Colors.white,
+                          const Color(0xffF4F6FB),
+                        ],
                 )
-              : const LinearGradient(
-                  colors: [AppTheme.primary, AppTheme.secondary],
-                ),
+              : AppTheme.primaryGradient,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(24),
             topRight: const Radius.circular(24),
-            bottomLeft: Radius.circular(isBot ? 4 : 24),
-            bottomRight: Radius.circular(isBot ? 24 : 4),
+            bottomLeft: Radius.circular(
+              isBot ? 4 : 24,
+            ),
+            bottomRight: Radius.circular(
+              isBot ? 24 : 4,
+            ),
           ),
           boxShadow: [
             BoxShadow(
               color: isBot
-                  ? Colors.black26
-                  : AppTheme.primary.withOpacity(0.35),
+                  ? Colors.black12
+                  : AppTheme.primary.withOpacity(0.25),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -204,8 +235,12 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         ),
         child: Text(
           text,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: isBot
+                ? (isDark
+                    ? Colors.white
+                    : Colors.black87)
+                : Colors.white,
             height: 1.5,
           ),
         ),
@@ -214,21 +249,58 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   }
 
   Widget quickChip(String text) {
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: () {
         controller.text = text;
         sendMessage();
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 10,
+        ),
         decoration: BoxDecoration(
-          color: Colors.white10,
+          color:
+              isDark ? Colors.white10 : Colors.white,
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: Colors.white24),
+          border: Border.all(
+            color:
+                isDark ? Colors.white12 : Colors.black12,
+          ),
         ),
         child: Text(
           text,
-          style: const TextStyle(color: Colors.white70),
+          style: TextStyle(
+            color: isDark
+                ? Colors.white70
+                : Colors.black54,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget typingIndicator() {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: PremiumCard(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppTheme.primary,
+              ),
+            ),
+            SizedBox(width: 12),
+            Text("AI is thinking..."),
+          ],
         ),
       ),
     );
@@ -243,10 +315,13 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark;
+
     return PremiumScreen(
       title: "AI Assistant",
       subtitle: "Career guidance chatbot",
-      icon: Icons.smart_toy,
+      icon: Icons.smart_toy_rounded,
       scrollable: false,
       child: Column(
         children: [
@@ -255,29 +330,45 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
               child: Column(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(22),
+                    height: 110,
+                    width: 110,
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Colors.purple, Colors.deepPurple],
-                      ),
-                      borderRadius: BorderRadius.circular(30),
+                      gradient: AppTheme.primaryGradient,
+                      shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.smart_toy,
-                      color: Colors.white,
-                      size: 52,
+                    child: Image.asset(
+                      'assets/icon/ai_robot.png',
                     ),
                   ),
+
                   const SizedBox(height: 18),
-                  const Text(
-                    "Ask your AI Assistant",
+
+                  Text(
+                    "Ask AI Assistant",
                     style: TextStyle(
-                      color: Colors.white,
+                      color: isDark
+                          ? Colors.white
+                          : Colors.black87,
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 14),
+
+                  const SizedBox(height: 10),
+
+                  Text(
+                    "Jobs, resume, interviews, aptitude & career guidance",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: isDark
+                          ? Colors.white70
+                          : Colors.black54,
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
+
                   Wrap(
                     spacing: 10,
                     runSpacing: 10,
@@ -291,7 +382,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 ],
               ),
             ),
+
           const SizedBox(height: 14),
+
           Expanded(
             child: ListView.builder(
               controller: scrollController,
@@ -299,29 +392,40 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
               itemBuilder: (_, i) {
                 final msg = messages[i];
                 final isBot = msg.containsKey("bot");
-                return buildBubble(msg.values.first, isBot);
+
+                return buildBubble(
+                  msg.values.first,
+                  isBot,
+                );
               },
             ),
           ),
-          if (loading)
-            const Padding(
-              padding: EdgeInsets.only(bottom: 12),
-              child: CircularProgressIndicator(
-                color: AppTheme.primary,
-              ),
-            ),
+
+          if (loading) typingIndicator(),
+
           PremiumCard(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 8,
+            ),
             child: Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: controller,
                     onSubmitted: (_) => sendMessage(),
-                    style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(
+                    style: TextStyle(
+                      color: isDark
+                          ? Colors.white
+                          : Colors.black87,
+                    ),
+                    decoration: InputDecoration(
                       hintText: "Ask anything...",
-                      hintStyle: TextStyle(color: Colors.white54),
+                      hintStyle: TextStyle(
+                        color: isDark
+                            ? Colors.white54
+                            : Colors.black45,
+                      ),
                       border: InputBorder.none,
                     ),
                   ),
@@ -330,14 +434,13 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                   onTap: sendMessage,
                   child: Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [AppTheme.primary, AppTheme.secondary],
-                      ),
+                      gradient:
+                          AppTheme.primaryGradient,
                     ),
                     child: const Icon(
-                      Icons.send,
+                      Icons.send_rounded,
                       color: Colors.white,
                     ),
                   ),

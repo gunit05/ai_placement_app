@@ -1,17 +1,16 @@
 import 'dart:io';
 import 'dart:ui';
-import '../main.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:local_auth/local_auth.dart';
-
-import 'premium_screen.dart';
+import 'premium_screen.dart' as premium;
 import 'login_screen.dart';
-import '../widgets/feedback_dialog.dart';
 import 'terms_privacy_screen.dart';
+import '../widgets/feedback_dialog.dart';
+import '../theme/premium_ui.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String username;
@@ -28,7 +27,8 @@ class ProfileScreen extends StatefulWidget {
   });
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<ProfileScreen> createState() =>
+      _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen>
@@ -84,7 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen>
       setState(() {
         imagePath = file.path;
       });
-    } catch (e) {
+    } catch (_) {
       showMsg("Image pick failed");
     }
   }
@@ -92,32 +92,45 @@ class _ProfileScreenState extends State<ProfileScreen>
   Future<void> toggleFaceLock(bool value) async {
     try {
       if (!value) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('face_lock', false);
+
         widget.onToggleFace(false);
-        showMsg("Face Lock disabled");
+        showMsg("Biometric lock disabled");
         return;
       }
 
-      final available = await auth.canCheckBiometrics;
       final supported = await auth.isDeviceSupported();
+      final canCheck = await auth.canCheckBiometrics;
+      final available =
+          await auth.getAvailableBiometrics();
 
-      if (!available || !supported) {
+      if (!supported ||
+          !canCheck ||
+          available.isEmpty) {
         showMsg("Biometric not available");
         return;
       }
 
       final authenticated = await auth.authenticate(
-        localizedReason: 'Authenticate to enable Face Lock',
+        localizedReason: 'Verify identity',
         options: const AuthenticationOptions(
           biometricOnly: true,
           stickyAuth: true,
+          useErrorDialogs: true,
         ),
       );
 
       if (authenticated) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('face_lock', true);
+
         widget.onToggleFace(true);
-        showMsg("Face Lock enabled");
+        showMsg("Biometric lock enabled");
+      } else {
+        widget.onToggleFace(false);
       }
-    } catch (e) {
+    } catch (_) {
       showMsg("Biometric authentication failed");
     }
   }
@@ -126,7 +139,11 @@ class _ProfileScreenState extends State<ProfileScreen>
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg)),
+      SnackBar(
+        content: Text(msg),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: AppTheme.primary,
+      ),
     );
   }
 
@@ -137,53 +154,67 @@ class _ProfileScreenState extends State<ProfileScreen>
 
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xff111C44),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25),
-        ),
-        title: const Text(
-          "About App",
-          style: TextStyle(color: Colors.white),
-        ),
-        content: Text(
-          "AI Placement App 🚀\n\n"
-          "Version: ${info.version} (${info.buildNumber})\n\n"
-          "• Resume Analysis\n"
-          "• AI Career Guidance\n"
-          "• Interview Practice\n"
-          "• Job Tracking\n"
-          "• AI Chatbot\n"
-          "• Coding Interview",
-          style: const TextStyle(
-            color: Colors.white70,
-            height: 1.6,
+      builder: (_) {
+        final isDark =
+            Theme.of(context).brightness ==
+                Brightness.dark;
+
+        return AlertDialog(
+          backgroundColor: isDark
+              ? AppTheme.darkCard
+              : Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
           ),
-        ),
-      ),
+          title: Text(
+            "About App",
+            style: TextStyle(
+              color: isDark
+                  ? Colors.white
+                  : Colors.black87,
+            ),
+          ),
+          content: Text(
+            "AI Placement App\n\n"
+            "Version: ${info.version} (${info.buildNumber})\n\n"
+            "AI-powered interview preparation, resume analysis, career coaching, and placement assistance.",
+            style: TextStyle(
+              color: isDark
+                  ? Colors.white70
+                  : Colors.black54,
+              height: 1.5,
+            ),
+          ),
+        );
+      },
     );
   }
 
-  Widget glassCard({required Widget child}) {
+  Widget glassCard({
+    required Widget child,
+  }) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(30),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+        filter: ImageFilter.blur(
+          sigmaX: 14,
+          sigmaY: 14,
+        ),
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(30),
             gradient: LinearGradient(
               colors: [
-                Colors.white.withOpacity(0.10),
-                Colors.white.withOpacity(0.04),
+                Colors.white.withOpacity(0.08),
+                Colors.white.withOpacity(0.03),
               ],
             ),
             border: Border.all(
-              color: Colors.white.withOpacity(0.08),
+              color: Colors.white.withOpacity(0.06),
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.deepPurple.withOpacity(0.22),
+                color: AppTheme.primary.withOpacity(0.15),
                 blurRadius: 25,
                 offset: const Offset(0, 14),
               ),
@@ -195,53 +226,17 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  Widget statCard(
-    String value,
-    String label,
-    List<Color> colors,
-    IconData icon,
-  ) {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(colors: colors),
-          borderRadius: BorderRadius.circular(22),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: Colors.white),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget settingTile(
     IconData icon,
     String title,
     List<Color> colors, {
     Widget? trailing,
     VoidCallback? onTap,
-    Color textColor = Colors.white,
+    Color? textColor,
   }) {
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark;
+
     return ListTile(
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(
@@ -259,14 +254,19 @@ class _ProfileScreenState extends State<ProfileScreen>
       title: Text(
         title,
         style: TextStyle(
-          color: textColor,
+          color: textColor ??
+              (isDark
+                  ? Colors.white
+                  : Colors.black87),
           fontWeight: FontWeight.w600,
         ),
       ),
       trailing: trailing ??
-          const Icon(
+          Icon(
             Icons.arrow_forward_ios,
-            color: Colors.white54,
+            color: isDark
+                ? Colors.white54
+                : Colors.black45,
             size: 16,
           ),
     );
@@ -274,19 +274,29 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xff040B2D),
+      backgroundColor:
+          isDark ? AppTheme.darkBg : AppTheme.lightBg,
       body: Stack(
         children: [
           Positioned(
             top: -120,
             left: -80,
-            child: glow(260, Colors.deepPurple.withOpacity(0.25)),
+            child: glow(
+              260,
+              AppTheme.primary.withOpacity(0.22),
+            ),
           ),
           Positioned(
             bottom: -140,
             right: -100,
-            child: glow(300, Colors.purpleAccent.withOpacity(0.18)),
+            child: glow(
+              300,
+              Colors.blue.withOpacity(0.10),
+            ),
           ),
           SafeArea(
             child: SingleChildScrollView(
@@ -298,13 +308,17 @@ class _ProfileScreenState extends State<ProfileScreen>
                     builder: (_, child) {
                       return Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(35),
+                          borderRadius:
+                              BorderRadius.circular(35),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.deepPurple.withOpacity(
-                                0.20 + (glowController.value * 0.25),
+                              color: AppTheme.primary
+                                  .withOpacity(
+                                0.15 +
+                                    (glowController.value *
+                                        0.15),
                               ),
-                              blurRadius: 35,
+                              blurRadius: 30,
                             ),
                           ],
                         ),
@@ -317,46 +331,49 @@ class _ProfileScreenState extends State<ProfileScreen>
                         child: Column(
                           children: [
                             Stack(
-                              alignment: Alignment.bottomRight,
+                              alignment:
+                                  Alignment.bottomRight,
                               children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: Colors.deepPurpleAccent,
-                                      width: 3,
-                                    ),
-                                  ),
-                                  child: CircleAvatar(
-                                    radius: 58,
-                                    backgroundColor: Colors.deepPurple,
-                                    backgroundImage: imagePath != null
-                                        ? FileImage(File(imagePath!))
-                                        : null,
-                                    child: imagePath == null
-                                        ? Text(
-                                            widget.username[0].toUpperCase(),
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 40,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          )
-                                        : null,
-                                  ),
+                                CircleAvatar(
+                                  radius: 58,
+                                  backgroundColor:
+                                      AppTheme.primary,
+                                  backgroundImage:
+                                      imagePath != null
+                                          ? FileImage(
+                                              File(
+                                                imagePath!,
+                                              ),
+                                            )
+                                          : null,
+                                  child: imagePath == null
+                                      ? Text(
+                                          widget.username[0]
+                                              .toUpperCase(),
+                                          style:
+                                              const TextStyle(
+                                            color:
+                                                Colors.white,
+                                            fontSize: 40,
+                                            fontWeight:
+                                                FontWeight.bold,
+                                          ),
+                                        )
+                                      : null,
                                 ),
                                 GestureDetector(
                                   onTap: pickImage,
                                   child: Container(
-                                    padding: const EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      gradient: const LinearGradient(
-                                        colors: [
-                                          Colors.orange,
-                                          Colors.pink,
-                                        ],
-                                      ),
-                                      borderRadius: BorderRadius.circular(16),
+                                    padding:
+                                        const EdgeInsets.all(
+                                            10),
+                                    decoration:
+                                        BoxDecoration(
+                                      gradient:
+                                          AppTheme.aiGradient,
+                                      borderRadius:
+                                          BorderRadius
+                                              .circular(16),
                                     ),
                                     child: const Icon(
                                       Icons.camera_alt,
@@ -367,119 +384,139 @@ class _ProfileScreenState extends State<ProfileScreen>
                                 ),
                               ],
                             ),
+
                             const SizedBox(height: 18),
+
                             Text(
-                              widget.username.split('@')[0],
-                              style: const TextStyle(
-                                color: Colors.white,
+                              widget.username
+                                  .split('@')[0],
+                              style: TextStyle(
+                                color: isDark
+                                    ? Colors.white
+                                    : Colors.black87,
                                 fontSize: 28,
-                                fontWeight: FontWeight.bold,
+                                fontWeight:
+                                    FontWeight.bold,
                               ),
                             ),
+
                             const SizedBox(height: 10),
+
                             Container(
-                              padding: const EdgeInsets.symmetric(
+                              padding:
+                                  const EdgeInsets.symmetric(
                                 horizontal: 18,
                                 vertical: 8,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.deepPurple.withOpacity(0.20),
-                                borderRadius: BorderRadius.circular(20),
+                                color: AppTheme.primary
+                                    .withOpacity(0.15),
+                                borderRadius:
+                                    BorderRadius.circular(
+                                        20),
                               ),
                               child: Text(
                                 widget.aiRole,
-                                style: const TextStyle(
-                                  color: Colors.white70,
+                                style: TextStyle(
+                                  color: isDark
+                                      ? Colors.white70
+                                      : Colors.black54,
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 24),
-                            Row(
-                              children: [
-                                statCard(
-                                  "12",
-                                  "Applied",
-                                  [Colors.blue, Colors.cyan],
-                                  Icons.work,
-                                ),
-                                statCard(
-                                  "8",
-                                  "Interviews",
-                                  [Colors.purple, Colors.pink],
-                                  Icons.mic,
-                                ),
-                                statCard(
-                                  "85%",
-                                  "Score",
-                                  [Colors.green, Colors.teal],
-                                  Icons.verified,
-                                ),
-                              ],
                             ),
                           ],
                         ),
                       ),
                     ),
                   ),
+
                   const SizedBox(height: 24),
+
                   glassCard(
                     child: Padding(
                       padding: const EdgeInsets.all(10),
                       child: Column(
                         children: [
                           settingTile(
-                            Icons.face,
-                            "Face Lock",
-                            [Colors.orange, Colors.deepOrange],
+                            Icons.fingerprint,
+                            "Biometric Lock",
+                            [
+                              Colors.orange,
+                              Colors.deepOrange
+                            ],
                             trailing: Switch(
                               value: widget.faceLock,
-                              activeThumbColor: Colors.deepPurpleAccent,
-                              onChanged: toggleFaceLock,
+                              activeColor:
+                                  AppTheme.primary,
+                              onChanged:
+                                  toggleFaceLock,
                             ),
                           ),
+
                           settingTile(
                             Icons.feedback,
                             "Send Feedback",
-                            [Colors.pink, Colors.redAccent],
-                            onTap: () => showFeedbackDialog(
+                            [
+                              Colors.pink,
+                              Colors.redAccent
+                            ],
+                            onTap: () =>
+                                showFeedbackDialog(
                               context: context,
-                              username: widget.username,
+                              username:
+                                  widget.username,
                               onSuccess: () {},
                             ),
                           ),
+
                           settingTile(
                             Icons.privacy_tip,
                             "Terms & Privacy",
-                            [Colors.cyan, Colors.teal],
+                            [
+                              Colors.cyan,
+                              Colors.teal
+                            ],
                             onTap: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const TermsPrivacyScreen(),
+                                  builder: (_) =>
+                                      const TermsPrivacyScreen(),
                                 ),
                               );
                             },
                           ),
+
                           settingTile(
                             Icons.info_outline,
                             "About App",
-                            [Colors.amber, Colors.orange],
+                            [
+                              Colors.amber,
+                              Colors.orange
+                            ],
                             onTap: showAbout,
                           ),
+
                           settingTile(
                             Icons.logout,
                             "Logout",
-                            [Colors.red, Colors.redAccent],
+                            [
+                              Colors.red,
+                              Colors.redAccent
+                            ],
                             textColor: Colors.red,
                             onTap: () async {
-                              await Supabase.instance.client.auth.signOut();
+                              await Supabase.instance.client
+                                  .auth
+                                  .signOut();
 
                               if (!mounted) return;
 
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const LoginScreen(),
+                                  builder: (_) =>
+                                      const LoginScreen(),
                                 ),
                               );
                             },
@@ -488,33 +525,34 @@ class _ProfileScreenState extends State<ProfileScreen>
                       ),
                     ),
                   ),
+
                   const SizedBox(height: 28),
+
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xff7B2FF7),
-                          Color(0xff4A00E0),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(30),
+                      gradient:
+                          AppTheme.primaryGradient,
+                      borderRadius:
+                          BorderRadius.circular(30),
                     ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          "🚀 Premium AI Features",
+                          "Premium AI Features",
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 24,
-                            fontWeight: FontWeight.bold,
+                            fontWeight:
+                                FontWeight.bold,
                           ),
                         ),
                         const SizedBox(height: 10),
                         const Text(
-                          "Unlock premium interview AI, analytics & advanced career insights.",
+                          "Unlock advanced AI interviews, analytics & career intelligence.",
                           style: TextStyle(
                             color: Colors.white70,
                             height: 1.5,
@@ -526,26 +564,33 @@ class _ProfileScreenState extends State<ProfileScreen>
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => PremiumScreen(
-                                  username: widget.username,
+                               builder: (_) => premium.PremiumScreen(
+                                  username:
+                                      widget.username,
                                 ),
                               ),
                             );
                           },
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
+                            padding:
+                                const EdgeInsets.symmetric(
                               horizontal: 22,
                               vertical: 14,
                             ),
-                            decoration: BoxDecoration(
+                            decoration:
+                                BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius:
+                                  BorderRadius
+                                      .circular(20),
                             ),
                             child: const Text(
                               "Upgrade Now",
                               style: TextStyle(
-                                color: Color(0xff4A00E0),
-                                fontWeight: FontWeight.bold,
+                                color:
+                                    Color(0xff4A00E0),
+                                fontWeight:
+                                    FontWeight.bold,
                               ),
                             ),
                           ),

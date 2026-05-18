@@ -13,14 +13,17 @@ class ForgotPasswordScreen extends StatefulWidget {
 class _ForgotPasswordScreenState
     extends State<ForgotPasswordScreen> {
   final emailController = TextEditingController();
-
   bool loading = false;
 
   void _show(String msg) {
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg)),
+      SnackBar(
+        content: Text(msg),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: AppTheme.primary,
+      ),
     );
   }
 
@@ -37,17 +40,14 @@ class _ForgotPasswordScreenState
     setState(() => loading = true);
 
     try {
-      await Supabase.instance.client.auth
-          .resetPasswordForEmail(
+      await Supabase.instance.client.auth.resetPasswordForEmail(
         email,
-        redirectTo:
-            'io.supabase.flutter://reset-password',
+        redirectTo: 'io.supabase.flutter://reset-password',
       );
 
-      _show("Reset link sent! Check email 📩");
-
-    } catch (e) {
-      _show("Error: $e");
+      _show("Reset link sent! Check your email");
+    } catch (_) {
+      _show("Failed to send reset link");
     }
 
     if (mounted) {
@@ -63,61 +63,61 @@ class _ForgotPasswordScreenState
 
   @override
   Widget build(BuildContext context) {
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark;
+
     return PremiumScreen(
       title: "Forgot Password",
-      subtitle:
-          "Reset your account password securely",
-      icon: Icons.lock_reset,
+      subtitle: "Recover your account securely",
+      icon: Icons.lock_reset_rounded,
       scrollable: true,
       child: PremiumCard(
         child: Column(
           children: [
             Container(
+              height: 120,
+              width: 120,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [
-                    Colors.orange,
-                    Colors.deepOrange,
-                    Colors.purple,
-                  ],
-                ),
-                borderRadius:
-                    BorderRadius.circular(24),
+                gradient: AppTheme.aiGradient,
+                shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color:
-                        Colors.orange.withOpacity(0.35),
-                    blurRadius: 20,
+                    color: AppTheme.primary.withOpacity(0.35),
+                    blurRadius: 24,
                   ),
                 ],
               ),
               child: const Icon(
-                Icons.lock_reset,
-                size: 60,
+                Icons.lock_reset_rounded,
+                size: 56,
                 color: Colors.white,
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
 
-            const Text(
-              "Forgot Password?",
+            Text(
+              "Reset Password",
               style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
+                color: isDark
+                    ? Colors.white
+                    : Colors.black87,
+                fontSize: 26,
                 fontWeight: FontWeight.bold,
               ),
             ),
 
             const SizedBox(height: 10),
 
-            const Text(
-              "Enter your registered email to receive a reset password link.",
+            Text(
+              "Enter your registered email to receive a password reset link.",
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
+                color: isDark
+                    ? Colors.white70
+                    : Colors.black54,
+                height: 1.5,
               ),
             ),
 
@@ -125,22 +125,20 @@ class _ForgotPasswordScreenState
 
             TextField(
               controller: emailController,
-              keyboardType:
-                  TextInputType.emailAddress,
-              style: const TextStyle(
-                color: Colors.white,
+              keyboardType: TextInputType.emailAddress,
+              style: TextStyle(
+                color: isDark
+                    ? Colors.white
+                    : Colors.black87,
               ),
               decoration: InputDecoration(
                 hintText: "Enter email",
-                hintStyle: const TextStyle(
-                  color: Colors.white54,
-                ),
-                prefixIcon: const Icon(
-                  Icons.email,
-                  color: Colors.white70,
-                ),
+                prefixIcon:
+                    const Icon(Icons.email_rounded),
                 filled: true,
-                fillColor: Colors.white10,
+                fillColor: isDark
+                    ? Colors.white10
+                    : Colors.grey.shade100,
                 border: OutlineInputBorder(
                   borderRadius:
                       BorderRadius.circular(18),
@@ -151,13 +149,16 @@ class _ForgotPasswordScreenState
 
             const SizedBox(height: 28),
 
-            PremiumButton(
-              text: loading
-                  ? "Sending..."
-                  : "Send Reset Link",
-              icon: Icons.send,
-              onTap:
-                  loading ? () {} : sendResetLink,
+            SizedBox(
+              width: double.infinity,
+              child: PremiumButton(
+                text: loading
+                    ? "Sending..."
+                    : "Send Reset Link",
+                icon: Icons.send_rounded,
+                onTap:
+                    loading ? () {} : sendResetLink,
+              ),
             ),
 
             const SizedBox(height: 16),
@@ -166,14 +167,18 @@ class _ForgotPasswordScreenState
               onPressed: () {
                 Navigator.pop(context);
               },
-              icon: const Icon(
-                Icons.arrow_back,
-                color: Colors.white70,
+              icon: Icon(
+                Icons.arrow_back_rounded,
+                color: isDark
+                    ? Colors.white70
+                    : Colors.black54,
               ),
-              label: const Text(
+              label: Text(
                 "Back to Login",
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: isDark
+                      ? Colors.white70
+                      : Colors.black54,
                 ),
               ),
             ),

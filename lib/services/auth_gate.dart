@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:local_auth/local_auth.dart';
+
 import '../screens/dashboard_screen.dart';
 import '../screens/login_screen.dart';
-
+import '../theme/premium_ui.dart';
 
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
@@ -39,11 +40,9 @@ class _AuthGateState extends State<AuthGate>
 
   Future<void> _checkAuth() async {
     try {
-      final user =
-          Supabase.instance.client.auth.currentUser;
+      final user = Supabase.instance.client.auth.currentUser;
 
-      final prefs =
-          await SharedPreferences.getInstance();
+      final prefs = await SharedPreferences.getInstance();
 
       final faceLockEnabled =
           prefs.getBool('face_lock') ?? false;
@@ -60,7 +59,12 @@ class _AuthGateState extends State<AuthGate>
         final supported =
             await auth.isDeviceSupported();
 
-        if (!canCheck || !supported) {
+        final available =
+            await auth.getAvailableBiometrics();
+
+        if (!canCheck ||
+            !supported ||
+            available.isEmpty) {
           _goLogin();
           return;
         }
@@ -68,11 +72,12 @@ class _AuthGateState extends State<AuthGate>
         final authenticated =
             await auth.authenticate(
           localizedReason:
-              "Unlock with Face ID / Fingerprint",
+              "Authenticate to continue",
           options:
               const AuthenticationOptions(
             biometricOnly: true,
             stickyAuth: true,
+            useErrorDialogs: true,
           ),
         );
 
@@ -83,8 +88,7 @@ class _AuthGateState extends State<AuthGate>
       }
 
       _goHome(user.email ?? "User");
-    } catch (e) {
-      debugPrint("AUTH GATE ERROR: $e");
+    } catch (_) {
       _goLogin();
     }
   }
@@ -116,27 +120,25 @@ class _AuthGateState extends State<AuthGate>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xff040B2D),
+      backgroundColor: AppTheme.darkBg,
       body: Stack(
         children: [
           Positioned(
             top: -100,
             left: -80,
-            child: glow(
+            child: _glow(
               240,
-              Colors.deepPurple.withOpacity(0.22),
+              AppTheme.primary.withOpacity(0.22),
             ),
           ),
-
           Positioned(
             bottom: -120,
             right: -90,
-            child: glow(
+            child: _glow(
               280,
-              Colors.purpleAccent.withOpacity(0.18),
+              Colors.blue.withOpacity(0.12),
             ),
           ),
-
           Center(
             child: AnimatedBuilder(
               animation: glowController,
@@ -146,46 +148,38 @@ class _AuthGateState extends State<AuthGate>
                       MainAxisAlignment.center,
                   children: [
                     Container(
+                      height: 140,
+                      width: 140,
                       padding:
-                          const EdgeInsets.all(28),
+                          const EdgeInsets.all(18),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient:
-                            const LinearGradient(
-                          colors: [
-                            Colors.deepPurple,
-                            Colors.pinkAccent,
-                          ],
-                        ),
+                            AppTheme.primaryGradient,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors
-                                .deepPurple
+                            color: AppTheme.primary
                                 .withOpacity(
                               0.25 +
-                                  glowController
-                                          .value *
-                                      0.35,
+                                  glowController.value *
+                                      0.25,
                             ),
                             blurRadius: 35,
-                            spreadRadius: 6,
                           ),
                         ],
                       ),
-                      child: const Icon(
-                        Icons.security,
-                        size: 56,
-                        color: Colors.white,
+                      child: Image.asset(
+                        'assets/images/ai_robot.png',
                       ),
                     ),
 
                     const SizedBox(height: 28),
 
                     const Text(
-                      "Securing Your Session",
+                      "Securing Session",
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 24,
+                        fontSize: 26,
                         fontWeight:
                             FontWeight.bold,
                       ),
@@ -210,8 +204,7 @@ class _AuthGateState extends State<AuthGate>
                       child:
                           CircularProgressIndicator(
                         strokeWidth: 3,
-                        color:
-                            Colors.deepPurpleAccent,
+                        color: AppTheme.primary,
                       ),
                     ),
                   ],
@@ -224,7 +217,7 @@ class _AuthGateState extends State<AuthGate>
     );
   }
 
-  Widget glow(double size, Color color) {
+  Widget _glow(double size, Color color) {
     return Container(
       width: size,
       height: size,

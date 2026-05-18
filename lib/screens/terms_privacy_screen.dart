@@ -41,11 +41,9 @@ class TermsPrivacyScreen extends StatelessWidget {
                     padding:
                         const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: Colors.white
-                          .withOpacity(0.20),
+                      color: Colors.white.withOpacity(0.20),
                       borderRadius:
-                          BorderRadius.circular(
-                              18),
+                          BorderRadius.circular(18),
                     ),
                     child: Icon(
                       icon,
@@ -53,26 +51,20 @@ class TermsPrivacyScreen extends StatelessWidget {
                       size: 28,
                     ),
                   ),
-
                   const SizedBox(width: 14),
-
                   Expanded(
                     child: Text(
                       title,
-                      style:
-                          const TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 21,
-                        fontWeight:
-                            FontWeight.bold,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                 ],
               ),
-
               const SizedBox(height: 20),
-
               Text(
                 content,
                 style: const TextStyle(
@@ -88,87 +80,180 @@ class TermsPrivacyScreen extends StatelessWidget {
     );
   }
 
+  Widget glow(
+    double size,
+    Color color,
+  ) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return PremiumScreen(
-      title: "Terms & Privacy",
-      subtitle:
-          "Policies, legal terms & support information",
-      icon: Icons.privacy_tip,
-      scrollable: true,
-      child: Column(
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark;
+
+    return Scaffold(
+      backgroundColor:
+          isDark ? AppTheme.darkBg : AppTheme.lightBg,
+      body: Stack(
         children: [
-          sectionCard(
-            icon: Icons.gavel,
-            title: "Terms & Conditions",
-            colors: const [
-              Color(0xff7B2FF7),
-              Color(0xffE940FF),
-            ],
-            content:
-                "• This application is designed for educational, placement preparation, AI career guidance, and job assistance purposes only.\n\n"
-                "• Users are fully responsible for information they provide including resumes, interview responses, profile details, and uploaded content.\n\n"
-                "• Any misuse, fraudulent activity, abusive behavior, spam, fake applications, or policy violations may lead to account suspension or permanent access restriction.\n\n"
-                "• Job recommendations and AI suggestions are generated for assistance only and do not guarantee employment outcomes.\n\n"
-                "• Interview scores, resume analysis, ATS scoring, and AI feedback are estimated guidance tools and should not be treated as official recruiter decisions.\n\n"
-                "• We reserve the right to improve, modify, suspend, or discontinue features without prior notice.",
+          Positioned(
+            top: -120,
+            left: -80,
+            child: glow(
+              260,
+              AppTheme.primary.withOpacity(0.22),
+            ),
           ),
 
-          const SizedBox(height: 18),
-
-          sectionCard(
-            icon: Icons.privacy_tip,
-            title: "Privacy Policy",
-            colors: const [
-              Color(0xff00C9FF),
-              Color(0xff92FE9D),
-            ],
-            content:
-                "• We collect only the minimum necessary data required for account functionality, personalization, job recommendations, and feature access.\n\n"
-                "• User profile details, resumes, skills, analytics, interview data, and chatbot interactions may be stored securely for app functionality.\n\n"
-                "• Your personal data is never sold, rented, or shared with unauthorized third parties.\n\n"
-                "• Cloud storage, database, and authentication systems are protected using secure backend services like Supabase.\n\n"
-                "• Analytics may be used to improve user experience, recommendation accuracy, feature quality, and performance monitoring.\n\n"
-                "• Users can request profile deletion, account removal, or stored data removal where applicable.",
+          Positioned(
+            bottom: -140,
+            right: -100,
+            child: glow(
+              300,
+              Colors.blue.withOpacity(0.10),
+            ),
           ),
 
-          const SizedBox(height: 18),
-
-          sectionCard(
-            icon: Icons.security,
-            title: "Security & User Safety",
-            colors: const [
-              Color(0xffFC466B),
-              Color(0xff3F5EFB),
-            ],
-            content:
-                "• We use secure authentication methods to protect account access.\n\n"
-                "• Users should keep login credentials private and avoid sharing sensitive information.\n\n"
-                "• Password reset and account recovery should only be performed by the account owner.\n\n"
-                "• While we implement protection measures, no digital platform can guarantee 100% absolute security.\n\n"
-                "• Suspicious activity may be monitored for fraud prevention and platform safety.",
+          Positioned(
+            right: -40,
+            bottom: 120,
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: 0.06,
+                child: Image.asset(
+                  'assets/images/ai_robot.png',
+                  width: 280,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
           ),
 
-          const SizedBox(height: 18),
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color:
+                                isDark ? Colors.white10 : Colors.white,
+                            borderRadius:
+                                BorderRadius.circular(18),
+                          ),
+                          child: Icon(
+                            Icons.arrow_back_ios_new,
+                            color: isDark
+                                ? Colors.white
+                                : Colors.black87,
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        "Terms & Privacy",
+                        style: TextStyle(
+                          color: isDark
+                              ? Colors.white
+                              : Colors.black87,
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Spacer(),
+                    ],
+                  ),
 
-          sectionCard(
-            icon: Icons.contact_mail,
-            title: "Support & Contact",
-            colors: const [
-              Color(0xffFF6A00),
-              Color(0xffEE0979),
-            ],
-            content:
-                "Need help with the application?\n\n"
-                "📧 gunitraj90@gmail.com\n\n"
-                "Support is available for:\n"
-                "• Login/account issues\n"
-                "• Resume upload problems\n"
-                "• Interview feature issues\n"
-                "• Job application bugs\n"
-                "• Payment/support queries\n"
-                "• Feedback and suggestions\n\n"
-                "We aim to respond as quickly as possible.",
+                  const SizedBox(height: 24),
+
+                  sectionCard(
+                    icon: Icons.gavel,
+                    title: "Terms & Conditions",
+                    colors: const [
+                      Color(0xff7B2FF7),
+                      Color(0xffE940FF),
+                    ],
+                    content:
+                        "• This application is designed for educational, placement preparation, AI career guidance, and job assistance purposes only.\n\n"
+                        "• Users are fully responsible for information they provide including resumes, interview responses, profile details, and uploaded content.\n\n"
+                        "• Any misuse, fraudulent activity, abusive behavior, spam, fake applications, or policy violations may lead to account suspension or permanent access restriction.\n\n"
+                        "• Job recommendations and AI suggestions are generated for assistance only and do not guarantee employment outcomes.\n\n"
+                        "• Interview scores, resume analysis, ATS scoring, and AI feedback are estimated guidance tools and should not be treated as official recruiter decisions.\n\n"
+                        "• We reserve the right to improve, modify, suspend, or discontinue features without prior notice.",
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  sectionCard(
+                    icon: Icons.privacy_tip,
+                    title: "Privacy Policy",
+                    colors: const [
+                      Color(0xff00C9FF),
+                      Color(0xff92FE9D),
+                    ],
+                    content:
+                        "• We collect only the minimum necessary data required for account functionality, personalization, job recommendations, and feature access.\n\n"
+                        "• User profile details, resumes, skills, analytics, interview data, and chatbot interactions may be stored securely for app functionality.\n\n"
+                        "• Your personal data is never sold, rented, or shared with unauthorized third parties.\n\n"
+                        "• Cloud storage, database, and authentication systems are protected using secure backend services like Supabase.\n\n"
+                        "• Analytics may be used to improve user experience, recommendation accuracy, feature quality, and performance monitoring.\n\n"
+                        "• Users can request profile deletion, account removal, or stored data removal where applicable.",
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  sectionCard(
+                    icon: Icons.security,
+                    title: "Security & User Safety",
+                    colors: const [
+                      Color(0xffFC466B),
+                      Color(0xff3F5EFB),
+                    ],
+                    content:
+                        "• We use secure authentication methods to protect account access.\n\n"
+                        "• Users should keep login credentials private and avoid sharing sensitive information.\n\n"
+                        "• Password reset and account recovery should only be performed by the account owner.\n\n"
+                        "• While we implement protection measures, no digital platform can guarantee 100% absolute security.\n\n"
+                        "• Suspicious activity may be monitored for fraud prevention and platform safety.",
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  sectionCard(
+                    icon: Icons.contact_mail,
+                    title: "Support & Contact",
+                    colors: const [
+                      Color(0xffFF6A00),
+                      Color(0xffEE0979),
+                    ],
+                    content:
+                        "Need help with the application?\n\n"
+                        "📧 gunitraj90@gmail.com\n\n"
+                        "Support is available for:\n"
+                        "• Login/account issues\n"
+                        "• Resume upload problems\n"
+                        "• Interview feature issues\n"
+                        "• Job application bugs\n"
+                        "• Payment/support queries\n"
+                        "• Feedback and suggestions\n\n"
+                        "We aim to respond as quickly as possible.",
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),

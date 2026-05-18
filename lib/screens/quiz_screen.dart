@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import '../theme/premium_ui.dart';
+
 class QuizScreen extends StatefulWidget {
   final String username;
 
@@ -18,6 +20,7 @@ class QuizScreen extends StatefulWidget {
 
 class _QuizScreenState extends State<QuizScreen> {
   final String apiKey = dotenv.env['GROQ_API_KEY_BACKUP'] ?? '';
+
   List<Map<String, dynamic>> questions = [];
   List<String> userSkills = [];
 
@@ -49,11 +52,19 @@ class _QuizScreenState extends State<QuizScreen> {
           .maybeSingle();
 
       if (res != null && res['skills'] != null) {
-        userSkills = List<String>.from(res['skills']);
+        userSkills = List<String>.from(
+          res['skills'],
+        );
       }
 
       if (userSkills.isEmpty) {
-        userSkills = ["Java", "Python", "DSA", "Operating System", "Database"];
+        userSkills = [
+          "Java",
+          "Python",
+          "DSA",
+          "Operating System",
+          "Database",
+        ];
       }
 
       final prompt = """
@@ -66,6 +77,7 @@ Rules:
 - one correct answer
 - beginner to intermediate difficulty
 - return ONLY valid JSON array
+
 Format:
 [
  {
@@ -77,7 +89,9 @@ Format:
 """;
 
       final response = await http.post(
-        Uri.parse('https://api.groq.com/openai/v1/chat/completions'),
+        Uri.parse(
+          'https://api.groq.com/openai/v1/chat/completions',
+        ),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $apiKey',
@@ -85,55 +99,56 @@ Format:
         body: jsonEncode({
           "model": "llama-3.3-70b-versatile",
           "messages": [
+            {"role": "system", "content": "You return only valid JSON."},
             {
-              "role": "system",
-              "content":
-                  "You are a technical interview quiz generator that returns only JSON."
-            },
-            {"role": "user", "content": prompt}
+              "role": "user",
+              "content": prompt,
+            }
           ],
-          "temperature": 0.7
+          "temperature": 0.7,
         }),
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+
         String aiText = data['choices'][0]['message']['content'];
 
-        aiText = aiText.replaceAll("```json", "");
-        aiText = aiText.replaceAll("```", "");
+        aiText = aiText.replaceAll(
+          "```json",
+          "",
+        );
+        aiText = aiText.replaceAll(
+          "```",
+          "",
+        );
         aiText = aiText.trim();
 
         final parsed = jsonDecode(aiText);
 
-        questions = List<Map<String, dynamic>>.from(parsed);
-
-        if (mounted) {
-          setState(() {
-            loading = false;
-          });
-        }
+        questions = List<Map<String, dynamic>>.from(
+          parsed,
+        );
       } else {
-        throw Exception("API Error ${response.statusCode}");
+        throw Exception();
       }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          loading = false;
-          questions = [
-            {
-              "q": "What is OOP?",
-              "options": [
-                "Object Oriented Programming",
-                "Operating Output Process",
-                "Object Output Program",
-                "None"
-              ],
-              "answer": "Object Oriented Programming"
-            }
-          ];
-        });
-      }
+    } catch (_) {
+      questions = [
+        {
+          "q": "What is OOP?",
+          "options": [
+            "Object Oriented Programming",
+            "Operating Output Process",
+            "Object Output Program",
+            "None"
+          ],
+          "answer": "Object Oriented Programming"
+        }
+      ];
+    }
+
+    if (mounted) {
+      setState(() => loading = false);
     }
   }
 
@@ -143,13 +158,9 @@ Format:
     }
 
     if (index < questions.length - 1) {
-      setState(() {
-        index++;
-      });
+      setState(() => index++);
     } else {
-      setState(() {
-        finished = true;
-      });
+      setState(() => finished = true);
     }
   }
 
@@ -157,10 +168,88 @@ Format:
     loadQuiz();
   }
 
+  Widget quizView() {
+    final q = questions[index];
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return PremiumCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Q${index + 1}. ${q['q']}",
+            style: TextStyle(
+              color: isDark ? Colors.white : Colors.black87,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 22),
+          ...(q['options'] as List)
+              .map(
+                (option) => Padding(
+                  padding: const EdgeInsets.only(
+                    bottom: 14,
+                  ),
+                  child: PremiumButton(
+                    text: option.toString(),
+                    icon: Icons.arrow_forward,
+                    onTap: () => checkAnswer(
+                      option.toString(),
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget resultView() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return PremiumCard(
+      child: Column(
+        children: [
+          const Icon(
+            Icons.emoji_events,
+            color: Colors.amber,
+            size: 80,
+          ),
+          const SizedBox(height: 18),
+          Text(
+            "Score: $score / ${questions.length}",
+            style: TextStyle(
+              color: isDark ? Colors.white : Colors.black87,
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            "Keep practicing to improve 🚀",
+            style: TextStyle(
+              color: isDark ? Colors.white70 : Colors.black54,
+            ),
+          ),
+          const SizedBox(height: 24),
+          PremiumButton(
+            text: "Generate New Quiz",
+            icon: Icons.refresh,
+            onTap: restartQuiz,
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xff040B2D),
+      backgroundColor: isDark ? AppTheme.darkBg : AppTheme.lightBg,
       body: Stack(
         children: [
           Positioned(
@@ -168,7 +257,7 @@ Format:
             left: -80,
             child: _glow(
               260,
-              Colors.deepPurple.withOpacity(0.25),
+              AppTheme.primary.withOpacity(0.22),
             ),
           ),
           Positioned(
@@ -176,7 +265,7 @@ Format:
             right: -100,
             child: _glow(
               300,
-              Colors.purpleAccent.withOpacity(0.18),
+              Colors.blue.withOpacity(0.10),
             ),
           ),
           SafeArea(
@@ -191,20 +280,20 @@ Format:
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.white10,
+                            color: isDark ? Colors.white10 : Colors.white,
                             borderRadius: BorderRadius.circular(18),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.arrow_back_ios_new,
-                            color: Colors.white,
+                            color: isDark ? Colors.white : Colors.black87,
                           ),
                         ),
                       ),
                       const Spacer(),
-                      const Text(
+                      Text(
                         "Technical Quiz",
                         style: TextStyle(
-                          color: Colors.white,
+                          color: isDark ? Colors.white : Colors.black87,
                           fontSize: 26,
                           fontWeight: FontWeight.bold,
                         ),
@@ -218,12 +307,7 @@ Format:
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(30),
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xff7B2FF7),
-                          Color(0xff4A00E0),
-                        ],
-                      ),
+                      gradient: AppTheme.primaryGradient,
                     ),
                     child: Column(
                       children: [
@@ -256,12 +340,10 @@ Format:
                   ),
                   const SizedBox(height: 30),
                   if (loading)
-                    const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(40),
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                        ),
+                    const Padding(
+                      padding: EdgeInsets.all(40),
+                      child: CircularProgressIndicator(
+                        color: AppTheme.primary,
                       ),
                     )
                   else if (!finished)
@@ -277,137 +359,10 @@ Format:
     );
   }
 
-  Widget quizView() {
-    final q = questions[index];
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xff111C44),
-            Color(0xff09122F),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(28),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Q${index + 1}. ${q['q']}",
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 20),
-          ...(q['options'] as List)
-              .map(
-                (option) => Padding(
-                  padding: const EdgeInsets.only(bottom: 14),
-                  child: GestureDetector(
-                    onTap: () => checkAnswer(option.toString()),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [
-                            Color(0xff7B2FF7),
-                            Color(0xff4A00E0),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        option.toString(),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              )
-              .toList(),
-        ],
-      ),
-    );
-  }
-
-  Widget resultView() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xff111C44),
-            Color(0xff09122F),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(28),
-      ),
-      child: Column(
-        children: [
-          const Icon(
-            Icons.emoji_events,
-            color: Colors.amber,
-            size: 80,
-          ),
-          const SizedBox(height: 18),
-          Text(
-            "Score: $score / ${questions.length}",
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 10),
-          const Text(
-            "Keep practicing to improve 🚀",
-            style: TextStyle(
-              color: Colors.white70,
-            ),
-          ),
-          const SizedBox(height: 24),
-          GestureDetector(
-            onTap: restartQuiz,
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 28,
-                vertical: 16,
-              ),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xff7B2FF7),
-                    Color(0xff4A00E0),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Text(
-                "Generate New Quiz",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _glow(double size, Color color) {
+  Widget _glow(
+    double size,
+    Color color,
+  ) {
     return Container(
       width: size,
       height: size,

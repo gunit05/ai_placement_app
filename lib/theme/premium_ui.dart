@@ -4,9 +4,64 @@ import 'package:flutter/material.dart';
 class AppTheme {
   static const Color primary = Color(0xFF7B2FF7);
   static const Color secondary = Color(0xFF4A00E0);
+  static const Color accent = Color(0xFF9D4DFF);
+
   static const Color darkBg = Color(0xFF040B2D);
-  static const Color card1 = Color(0xFF111C44);
-  static const Color card2 = Color(0xFF09122F);
+  static const Color darkCard = Color(0xFF111C44);
+  static const Color darkCard2 = Color(0xFF09122F);
+
+  static const Color lightBg = Color(0xFFF7F8FC);
+  static const Color lightCard = Color(0xFFFFFFFF);
+  static const Color lightBorder = Color(0xFFE8EAF6);
+
+  static const LinearGradient primaryGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFF9D4DFF),
+      Color(0xFF7B2FF7),
+      Color(0xFF4A00E0),
+    ],
+  );
+
+  static const LinearGradient aiGradient = LinearGradient(
+    colors: [
+      Color(0xFF6A11CB),
+      Color(0xFF2575FC),
+    ],
+  );
+}
+
+class AppThemes {
+  static ThemeData darkTheme = ThemeData(
+    brightness: Brightness.dark,
+    scaffoldBackgroundColor: AppTheme.darkBg,
+    fontFamily: 'Poppins',
+    colorScheme: const ColorScheme.dark(
+      primary: AppTheme.primary,
+      secondary: AppTheme.secondary,
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+    ),
+    cardColor: AppTheme.darkCard,
+  );
+
+  static ThemeData lightTheme = ThemeData(
+    brightness: Brightness.light,
+    scaffoldBackgroundColor: AppTheme.lightBg,
+    fontFamily: 'Poppins',
+    colorScheme: const ColorScheme.light(
+      primary: AppTheme.primary,
+      secondary: AppTheme.secondary,
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+    ),
+    cardColor: AppTheme.lightCard,
+  );
 }
 
 class PremiumScreen extends StatelessWidget {
@@ -29,24 +84,35 @@ class PremiumScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppTheme.darkBg,
+      backgroundColor: isDark ? AppTheme.darkBg : AppTheme.lightBg,
       body: Stack(
         children: [
           Positioned(
             top: -120,
             left: -80,
-            child: _glow(260, Colors.deepPurple.withOpacity(0.25)),
+            child: _glow(
+              260,
+              AppTheme.primary.withOpacity(0.22),
+            ),
           ),
           Positioned(
             bottom: -140,
             right: -100,
-            child: _glow(300, Colors.purpleAccent.withOpacity(0.18)),
+            child: _glow(
+              320,
+              Colors.blue.withOpacity(0.10),
+            ),
           ),
           Positioned(
-            top: 120,
+            top: 150,
             right: -50,
-            child: _glow(180, Colors.blue.withOpacity(0.08)),
+            child: _glow(
+              180,
+              Colors.purpleAccent.withOpacity(0.12),
+            ),
           ),
           SafeArea(
             child: scrollable
@@ -61,7 +127,7 @@ class PremiumScreen extends StatelessWidget {
                           icon: icon,
                           actions: actions,
                         ),
-                        const SizedBox(height: 25),
+                        const SizedBox(height: 24),
                         child,
                       ],
                     ),
@@ -76,7 +142,7 @@ class PremiumScreen extends StatelessWidget {
                           icon: icon,
                           actions: actions,
                         ),
-                        const SizedBox(height: 25),
+                        const SizedBox(height: 24),
                         Expanded(child: child),
                       ],
                     ),
@@ -115,6 +181,8 @@ class PremiumHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Row(
       children: [
         GlassIcon(icon: icon),
@@ -125,17 +193,17 @@ class PremiumHeader extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 subtitle,
-                style: const TextStyle(
-                  color: Colors.white70,
+                style: TextStyle(
+                  color: isDark ? Colors.white70 : Colors.black54,
                   fontSize: 14,
                 ),
               ),
@@ -162,20 +230,17 @@ class GlassIcon extends StatelessWidget {
       borderRadius: BorderRadius.circular(22),
       child: BackdropFilter(
         filter: ImageFilter.blur(
-          sigmaX: 10,
-          sigmaY: 10,
+          sigmaX: 14,
+          sigmaY: 14,
         ),
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [
-                Color(0xffFF6B6B),
-                Color(0xffFF8E53),
-                Color(0xff7B2FF7),
-              ],
-            ),
+            gradient: AppTheme.primaryGradient,
             borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.15),
+            ),
           ),
           child: Icon(
             icon,
@@ -200,24 +265,37 @@ class PremiumCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
       padding: padding,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppTheme.card1,
-            AppTheme.card2,
-          ],
+        gradient: isDark
+            ? const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppTheme.darkCard,
+                  AppTheme.darkCard2,
+                ],
+              )
+            : const LinearGradient(
+                colors: [
+                  Colors.white,
+                  Color(0xFFF7F8FC),
+                ],
+              ),
+        borderRadius: BorderRadius.circular(26),
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.lightBorder,
         ),
-        borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.35),
-            blurRadius: 20,
-            offset: const Offset(0, 12),
+            color: isDark
+                ? Colors.black.withOpacity(0.35)
+                : Colors.black.withOpacity(0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -230,14 +308,12 @@ class PremiumButton extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
   final IconData? icon;
-  final Color? color;
 
   const PremiumButton({
     super.key,
     required this.text,
     required this.onTap,
     this.icon,
-    this.color,
   });
 
   @override
@@ -247,13 +323,7 @@ class PremiumButton extends StatelessWidget {
       child: Container(
         height: 58,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [
-              Color(0xffFF6B6B),
-              Color(0xff7B2FF7),
-              Color(0xff4A00E0),
-            ],
-          ),
+          gradient: AppTheme.primaryGradient,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -267,111 +337,18 @@ class PremiumButton extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (icon != null)
-                Icon(icon, color: Colors.white),
-
-              if (icon != null)
-                const SizedBox(width: 10),
-
+              if (icon != null) Icon(icon, color: Colors.white),
+              if (icon != null) const SizedBox(width: 10),
               Text(
                 text,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w700,
                   fontSize: 16,
                 ),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class PremiumTile extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
-
-  const PremiumTile({
-    super.key,
-    required this.title,
-    required this.icon,
-    required this.color,
-    required this.onTap,
-  });
-
-  List<Color> _iconGradient(IconData icon) {
-    if (icon == Icons.work) {
-      return [Colors.orange, Colors.deepOrange];
-    }
-    if (icon == Icons.upload_file) {
-      return [Colors.blue, Colors.cyan];
-    }
-    if (icon == Icons.verified) {
-      return [Colors.green, Colors.teal];
-    }
-    if (icon == Icons.smart_toy) {
-      return [Colors.purple, Colors.pink];
-    }
-    if (icon == Icons.mic) {
-      return [Colors.red, Colors.pinkAccent];
-    }
-    if (icon == Icons.code) {
-      return [Colors.indigo, Colors.blue];
-    }
-    if (icon == Icons.psychology) {
-      return [Colors.cyan, Colors.teal];
-    }
-    if (icon == Icons.notifications) {
-      return [Colors.amber, Colors.orange];
-    }
-
-    return [AppTheme.primary, AppTheme.secondary];
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = _iconGradient(icon);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: PremiumCard(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(colors: colors),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: colors.first.withOpacity(0.4),
-                    blurRadius: 16,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: Icon(
-                icon,
-                color: Colors.white,
-                size: 30,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-          ],
         ),
       ),
     );

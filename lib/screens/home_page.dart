@@ -6,6 +6,7 @@ import 'chatbot_screen.dart';
 import 'interview_screen.dart';
 import 'jobs_screen.dart';
 import 'quiz_screen.dart';
+import 'aptitude_screen.dart';
 
 import '../theme/premium_ui.dart';
 
@@ -63,15 +64,12 @@ class HomePage extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               "Hello, $user 👋",
                               style: TextStyle(
-                                color: isDark
-                                    ? Colors.white
-                                    : Colors.black87,
+                                color: isDark ? Colors.white : Colors.black87,
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -80,9 +78,7 @@ class HomePage extends StatelessWidget {
                             Text(
                               "Your AI Placement Dashboard",
                               style: TextStyle(
-                                color: isDark
-                                    ? Colors.white70
-                                    : Colors.black54,
+                                color: isDark ? Colors.white70 : Colors.black54,
                                 fontSize: 14,
                               ),
                             ),
@@ -91,23 +87,18 @@ class HomePage extends StatelessWidget {
                       ),
                       GestureDetector(
                         onTap: () {
-                          go(
-                            context,
-                            NotificationsScreen(
-                              username: username,
-                            ),
-                          );
+                          go(context, NotificationsScreen(username: username));
                         },
                         child: Container(
-                          padding: const EdgeInsets.all(14),
+                          padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: isDark
-                                ? Colors.white10
-                                : Colors.white,
-                            borderRadius:
-                                BorderRadius.circular(18),
+                            color: isDark ? Colors.white12 : Colors.black12,
+                            shape: BoxShape.circle,
                           ),
-                          
+                          child: Icon(
+                            Icons.notifications_rounded,
+                            color: isDark ? Colors.white70 : Colors.black54,
+                          ),
                         ),
                       ),
                     ],
@@ -124,8 +115,7 @@ class HomePage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(34),
                       boxShadow: [
                         BoxShadow(
-                          color: AppTheme.primary
-                              .withOpacity(0.35),
+                          color: AppTheme.primary.withOpacity(0.35),
                           blurRadius: 28,
                           offset: const Offset(0, 14),
                         ),
@@ -135,16 +125,14 @@ class HomePage extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
                                 "AI Placement\nAssistant",
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 28,
-                                  fontWeight:
-                                      FontWeight.bold,
+                                  fontWeight: FontWeight.bold,
                                   height: 1.2,
                                 ),
                               ),
@@ -169,50 +157,24 @@ class HomePage extends StatelessWidget {
                                   );
                                 },
                                 child: Container(
-                                  padding:
-                                      const EdgeInsets.symmetric(
+                                  padding: const EdgeInsets.symmetric(
                                     horizontal: 18,
                                     vertical: 12,
                                   ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius:
-                                        BorderRadius.circular(
-                                            18),
-                                  ),
-                                  child: const Text(
-                                    "Start Interview",
-                                    style: TextStyle(
-                                      color:
-                                          Color(0xff4A00E0),
-                                      fontWeight:
-                                          FontWeight.bold,
-                                    ),
-                                  ),
+                                  
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        SizedBox(
-                          height: 170,
-                          child: Image.asset(
-                            'assets/icon/ai_robot.png',
-                            fit: BoxFit.contain,
-                          ),
-                        ),
+                        const SizedBox(height: 20),
                       ],
                     ),
                   ),
-
-                  const SizedBox(height: 20),
                   Text(
                     "Quick Actions",
                     style: TextStyle(
-                      color: isDark
-                          ? Colors.white
-                          : Colors.black87,
+                      color: isDark ? Colors.white : Colors.black87,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -222,8 +184,7 @@ class HomePage extends StatelessWidget {
 
                   GridView.count(
                     shrinkWrap: true,
-                    physics:
-                        const NeverScrollableScrollPhysics(),
+                    physics: const NeverScrollableScrollPhysics(),
                     crossAxisCount: 2,
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
@@ -248,18 +209,18 @@ class HomePage extends StatelessWidget {
                       _quickCard(
                         context,
                         isDark,
-                        Icons.work,
-                        "Find Jobs",
-                        JobsScreen(
+                        Icons.quiz,
+                        "AI Quiz",
+                        QuizScreen(
                           username: username,
                         ),
                       ),
                       _quickCard(
                         context,
                         isDark,
-                        Icons.quiz,
-                        "AI Quiz",
-                        QuizScreen(
+                        Icons.school,
+                        "AI Aptitude",
+                        AptitudeScreen(
                           username: username,
                         ),
                       ),
@@ -299,8 +260,7 @@ class HomePage extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color:
-                  isDark ? Colors.white70 : Colors.black54,
+              color: isDark ? Colors.white70 : Colors.black54,
             ),
           ),
         ],
@@ -337,8 +297,7 @@ class HomePage extends StatelessWidget {
             Text(
               title,
               style: TextStyle(
-                color:
-                    isDark ? Colors.white : Colors.black87,
+                color: isDark ? Colors.white : Colors.black87,
                 fontWeight: FontWeight.bold,
               ),
             ),

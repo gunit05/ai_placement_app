@@ -1,6 +1,10 @@
+import 'dart:convert';
 import 'dart:typed_data';
-import 'package:flutter/material.dart';
+
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
@@ -23,8 +27,12 @@ class _ResumeUploadScreenState
     extends State<ResumeUploadScreen> {
   Uint8List? fileBytes;
   String? fileName;
+
   bool uploading = false;
   String selectedRole = "Loading...";
+
+  final String groqApiKey =
+      dotenv.env['GROQ_API_KEY'] ?? "";
 
   @override
   void initState() {
@@ -49,6 +57,7 @@ class _ResumeUploadScreenState
       });
     } catch (_) {
       if (!mounted) return;
+
       setState(() {
         selectedRole = "Software Engineer";
       });
@@ -89,9 +98,96 @@ class _ResumeUploadScreenState
       "score": score,
       "missing": missing,
       "suggestions": missing.isEmpty
-          ? "Excellent Resume 🚀"
+          ? "Excellent Resume"
           : "Missing: ${missing.join(', ')}",
     };
+  }
+
+  Future<Map<String, dynamic>> analyzeWithGroq(
+    String resumeText,
+  ) async {
+    try {
+      if (groqApiKey.isEmpty) {
+        return {
+          "ai_score": 0,
+          "suggestions":
+              "Groq API key missing",
+          "strengths": "",
+        };
+      }
+
+      final response = await http.post(
+        Uri.parse(
+          'https://api.groq.com/openai/v1/chat/completions',
+        ),
+        headers: {
+          'Authorization':
+              'Bearer $groqApiKey',
+          'Content-Type':
+              'application/json',
+        },
+        body: jsonEncode({
+          "model": "llama-3.3-70b-versatile",
+          "temperature": 0.2,
+          "messages": [
+            {
+              "role": "system",
+              "content":
+                  "Return ONLY valid JSON."
+            },
+            {
+              "role": "user",
+              "content": """
+Analyze this resume for ATS.
+
+Role: $selectedRole
+
+Return exact JSON:
+{
+ "ai_score": 85,
+ "suggestions": "Improve formatting",
+ "strengths": "Good technical profile"
+}
+
+Resume:
+$resumeText
+"""
+            }
+          ]
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        return {
+          "ai_score": 0,
+          "suggestions":
+              "Groq request failed",
+          "strengths": "",
+        };
+      }
+
+      final data =
+          jsonDecode(response.body);
+
+      String content =
+          data['choices'][0]['message']
+                  ['content']
+              .toString();
+
+      content = content
+          .replaceAll('```json', '')
+          .replaceAll('```', '')
+          .trim();
+
+      return jsonDecode(content);
+    } catch (_) {
+      return {
+        "ai_score": 0,
+        "suggestions":
+            "AI analysis unavailable",
+        "strengths": "",
+      };
+    }
   }
 
   Future<void> pickResume() async {
@@ -104,8 +200,10 @@ class _ResumeUploadScreenState
 
     if (result != null && mounted) {
       setState(() {
-        fileBytes = result.files.single.bytes;
-        fileName = result.files.single.name;
+        fileBytes =
+            result.files.single.bytes;
+        fileName =
+            result.files.single.name;
       });
     }
   }
@@ -123,8 +221,8 @@ class _ResumeUploadScreenState
           .from('resumes')
           .uploadBinary(path, fileBytes!);
 
-      final fileUrl = Supabase
-          .instance.client.storage
+      final fileUrl = Supabase.instance.client
+          .storage
           .from('resumes')
           .getPublicUrl(path);
 
@@ -139,18 +237,22 @@ class _ResumeUploadScreenState
 
       text = cleanText(text);
 
-      final userData = await Supabase
-          .instance.client
-          .from('user_skills')
-          .select('skills')
-          .eq('username', widget.username)
-          .maybeSingle();
+      final userData =
+          await Supabase.instance.client
+              .from('user_skills')
+              .select('skills')
+              .eq('username', widget.username)
+              .maybeSingle();
 
       final skills = List<String>.from(
         userData?['skills'] ?? [],
       );
 
-      final ats = analyzeATS(text, skills);
+      final manualATS =
+          analyzeATS(text, skills);
+
+      final aiATS =
+          await analyzeWithGroq(text);
 
       await Supabase.instance.client
           .from('resume_uploads')
@@ -158,66 +260,46 @@ class _ResumeUploadScreenState
         'username': widget.username,
         'file_url': fileUrl,
         'resume_text': text,
+        'created_at': DateTime.now()
+            .toIso8601String(),
       });
 
       await Supabase.instance.client
           .from('resume_scores')
           .upsert({
         'username': widget.username,
-        'score': ats['score'],
+        'score': manualATS['score'],
         'missing_skills':
-            ats['missing'].join(', '),
-        'suggestions': ats['suggestions'],
+            manualATS['missing'].join(', '),
+        'suggestions':
+            manualATS['suggestions'],
+        'ai_score':
+            aiATS['ai_score'],
+        'ai_suggestions':
+            aiATS['suggestions'],
+        'strengths':
+            aiATS['strengths'],
+        'ats_type': 'hybrid',
+        'admin_override': false,
       }, onConflict: 'username');
 
       if (!mounted) return;
 
-      final isDark =
-          Theme.of(context).brightness ==
-              Brightness.dark;
-
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
-          backgroundColor:
-              isDark
-                  ? AppTheme.darkCard
-                  : Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.circular(24),
-          ),
-          title: Text(
-            "ATS Result 🚀",
-            style: TextStyle(
-              color: isDark
-                  ? Colors.white
-                  : Colors.black87,
-            ),
-          ),
+          title:
+              const Text("Hybrid ATS Complete"),
           content: Column(
             mainAxisSize:
                 MainAxisSize.min,
             children: [
               Text(
-                "Score: ${ats['score']}%",
-                style: const TextStyle(
-                  color: Colors.greenAccent,
-                  fontSize: 24,
-                  fontWeight:
-                      FontWeight.bold,
-                ),
+                "Manual ATS: ${manualATS['score']}%",
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               Text(
-                ats['suggestions'],
-                textAlign:
-                    TextAlign.center,
-                style: TextStyle(
-                  color: isDark
-                      ? Colors.white70
-                      : Colors.black54,
-                ),
+                "AI ATS: ${aiATS['ai_score']}%",
               ),
             ],
           ),
@@ -234,11 +316,7 @@ class _ResumeUploadScreenState
       ScaffoldMessenger.of(context)
           .showSnackBar(
         SnackBar(
-          backgroundColor:
-              AppTheme.primary,
-          content: Text(
-            "Upload failed: $e",
-          ),
+          content: Text("$e"),
         ),
       );
     }
@@ -269,10 +347,9 @@ class _ResumeUploadScreenState
             Brightness.dark;
 
     return Scaffold(
-      backgroundColor:
-          isDark
-              ? AppTheme.darkBg
-              : AppTheme.lightBg,
+      backgroundColor: isDark
+          ? AppTheme.darkBg
+          : AppTheme.lightBg,
       body: Stack(
         children: [
           Positioned(
@@ -280,9 +357,8 @@ class _ResumeUploadScreenState
             left: -80,
             child: glow(
               260,
-              AppTheme.primary.withOpacity(
-                0.22,
-              ),
+              AppTheme.primary.withValues(
+                  alpha: 0.22),
             ),
           ),
           Positioned(
@@ -290,9 +366,8 @@ class _ResumeUploadScreenState
             right: -100,
             child: glow(
               300,
-              Colors.blue.withOpacity(
-                0.10,
-              ),
+              Colors.blue.withValues(
+                  alpha: 0.10),
             ),
           ),
           SafeArea(
@@ -301,100 +376,33 @@ class _ResumeUploadScreenState
                   const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () =>
-                            Navigator.pop(
-                                context),
-                        child: Container(
-                          padding:
-                              const EdgeInsets
-                                  .all(12),
-                          decoration:
-                              BoxDecoration(
-                            color: isDark
-                                ? Colors
-                                    .white10
-                                : Colors.white,
-                            borderRadius:
-                                BorderRadius
-                                    .circular(
-                                        18),
-                          ),
-                          child: Icon(
-                            Icons
-                                .arrow_back_ios_new,
-                            color: isDark
-                                ? Colors.white
-                                : Colors
-                                    .black87,
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        "Resume Analyzer",
-                        style: TextStyle(
-                          color: isDark
-                              ? Colors.white
-                              : Colors.black87,
-                          fontSize: 24,
-                          fontWeight:
-                              FontWeight.bold,
-                        ),
-                      ),
-                      const Spacer(),
-                    ],
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  PremiumCard(
-                    child: Row(
-                      children: [
-                        Container(
-                          padding:
-                              const EdgeInsets
-                                  .all(14),
-                          decoration:
-                              BoxDecoration(
-                            gradient: AppTheme
-                                .primaryGradient,
-                            shape:
-                                BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.psychology,
-                            color:
-                                Colors.white,
-                            size: 30,
-                          ),
-                        ),
-                        const SizedBox(
-                            width: 14),
-                        Expanded(
-                          child: Text(
-                            "Target Role:\n$selectedRole",
-                            style: TextStyle(
-                              color: isDark
-                                  ? Colors
-                                      .white
-                                  : Colors
-                                      .black87,
-                              fontSize: 18,
-                              fontWeight:
-                                  FontWeight
-                                      .bold,
-                            ),
-                          ),
-                        ),
-                      ],
+                  const SizedBox(height: 20),
+                  Text(
+                    "Hybrid ATS Analyzer",
+                    style: TextStyle(
+                      color: isDark
+                          ? Colors.white
+                          : Colors.black87,
+                      fontSize: 24,
+                      fontWeight:
+                          FontWeight.bold,
                     ),
                   ),
-
                   const SizedBox(height: 24),
-
+                  PremiumCard(
+                    child: Text(
+                      "Target Role: $selectedRole",
+                      style: TextStyle(
+                        color: isDark
+                            ? Colors.white
+                            : Colors.black87,
+                        fontSize: 18,
+                        fontWeight:
+                            FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
                   GestureDetector(
                     onTap: pickResume,
                     child: Container(
@@ -402,68 +410,33 @@ class _ResumeUploadScreenState
                       height: 260,
                       decoration:
                           BoxDecoration(
-                        gradient: AppTheme
-                            .aiGradient,
+                        gradient:
+                            AppTheme.aiGradient,
                         borderRadius:
                             BorderRadius
                                 .circular(30),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppTheme
-                                .primary
-                                .withOpacity(
-                                    0.25),
-                            blurRadius: 20,
-                          ),
-                        ],
                       ),
-                      child: Column(
-                        mainAxisAlignment:
-                            MainAxisAlignment
-                                .center,
-                        children: [
-                          const Icon(
-                            Icons.cloud_upload,
+                      child: Center(
+                        child: Text(
+                          fileName ??
+                              "Upload PDF Resume",
+                          style:
+                              const TextStyle(
                             color:
                                 Colors.white,
-                            size: 72,
+                            fontSize: 18,
+                            fontWeight:
+                                FontWeight.bold,
                           ),
-                          const SizedBox(
-                              height: 18),
-                          Padding(
-                            padding:
-                                const EdgeInsets
-                                    .symmetric(
-                              horizontal: 20,
-                            ),
-                            child: Text(
-                              fileName ??
-                                  "Tap to Upload PDF Resume",
-                              textAlign:
-                                  TextAlign
-                                      .center,
-                              style:
-                                  const TextStyle(
-                                color: Colors
-                                    .white,
-                                fontSize: 18,
-                                fontWeight:
-                                    FontWeight
-                                        .w600,
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
-
                   const Spacer(),
-
                   PremiumButton(
                     text: uploading
                         ? "Analyzing..."
-                        : "Analyze Resume 🚀",
+                        : "Analyze Resume",
                     icon:
                         Icons.analytics,
                     onTap: uploading

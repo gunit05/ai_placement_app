@@ -107,12 +107,10 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark =
-        Theme.of(context).brightness == Brightness.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? AppTheme.darkBg : AppTheme.lightBg,
+      backgroundColor: isDark ? AppTheme.darkBg : AppTheme.lightBg,
       body: Stack(
         children: [
           Positioned(
@@ -138,7 +136,6 @@ class _SignupScreenState extends State<SignupScreen> {
               child: Column(
                 children: [
                   const SizedBox(height: 20),
-
                   Container(
                     height: 170,
                     width: 170,
@@ -148,43 +145,34 @@ class _SignupScreenState extends State<SignupScreen> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: AppTheme.primary
-                              .withOpacity(0.35),
+                          color: AppTheme.primary.withOpacity(0.35),
                           blurRadius: 30,
                         ),
                       ],
                     ),
-                    child: Image.asset(
-                      'assets/images/ai_robot.png',
+                    child: Icon(
+                      Icons.app_registration_rounded,
+                      color: Colors.white,
+                      size: 48,
                     ),
                   ),
-
                   const SizedBox(height: 28),
-
                   Text(
                     "Create Account",
                     style: TextStyle(
-                      color: isDark
-                          ? Colors.white
-                          : Colors.black87,
+                      color: isDark ? Colors.white : Colors.black87,
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-
                   const SizedBox(height: 10),
-
                   Text(
                     "Start your AI placement journey",
                     style: TextStyle(
-                      color: isDark
-                          ? Colors.white70
-                          : Colors.black54,
+                      color: isDark ? Colors.white70 : Colors.black54,
                     ),
                   ),
-
                   const SizedBox(height: 36),
-
                   PremiumCard(
                     child: Column(
                       children: [
@@ -194,77 +182,59 @@ class _SignupScreenState extends State<SignupScreen> {
                           icon: Icons.person_rounded,
                           isDark: isDark,
                         ),
-
                         const SizedBox(height: 18),
-
                         _inputField(
                           controller: emailController,
                           hint: "Enter email",
                           icon: Icons.email_rounded,
                           isDark: isDark,
                         ),
-
                         const SizedBox(height: 18),
-
                         _passwordField(isDark),
-
                         const SizedBox(height: 24),
-
                         SizedBox(
                           width: double.infinity,
                           child: PremiumButton(
-                            text: loading
-                                ? "Creating..."
-                                : "Create Account",
+                            text: loading ? "Creating..." : "Create Account",
                             onTap: loading ? () {} : signup,
                           ),
                         ),
-
                         const SizedBox(height: 16),
-
                         GestureDetector(
                           onTap: signInWithGoogle,
                           child: Container(
                             width: double.infinity,
-                            padding:
-                                const EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                               vertical: 16,
                             ),
                             decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: isDark
-                                    ? Colors.white12
-                                    : Colors.black12,
+                                color: isDark ? Colors.white12 : Colors.black12,
                               ),
                             ),
                             child: Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(
-                                  Icons.g_mobiledata,
-                                  size: 34,
+                                Image.asset(
+                                  'assets/icon/google.png',
+                                  height: 24,
+                                  width: 24,
                                 ),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 12),
                                 Text(
                                   "Continue with Google",
                                   style: TextStyle(
-                                    color: isDark
-                                        ? Colors.white
-                                        : Colors.black87,
-                                    fontWeight:
-                                        FontWeight.w600,
+                                    color:
+                                        isDark ? Colors.white : Colors.black87,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-
                         const SizedBox(height: 14),
-
                         TextButton(
                           onPressed: () {
                             Navigator.pop(context);
@@ -300,8 +270,7 @@ class _SignupScreenState extends State<SignupScreen> {
         hintText: hint,
         prefixIcon: Icon(icon),
         filled: true,
-        fillColor:
-            isDark ? Colors.white10 : Colors.grey.shade100,
+        fillColor: isDark ? Colors.white10 : Colors.grey.shade100,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide.none,
@@ -322,9 +291,7 @@ class _SignupScreenState extends State<SignupScreen> {
         prefixIcon: const Icon(Icons.lock_rounded),
         suffixIcon: IconButton(
           icon: Icon(
-            obscure
-                ? Icons.visibility_off
-                : Icons.visibility,
+            obscure ? Icons.visibility_off : Icons.visibility,
           ),
           onPressed: () {
             setState(() {
@@ -333,8 +300,7 @@ class _SignupScreenState extends State<SignupScreen> {
           },
         ),
         filled: true,
-        fillColor:
-            isDark ? Colors.white10 : Colors.grey.shade100,
+        fillColor: isDark ? Colors.white10 : Colors.grey.shade100,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide.none,

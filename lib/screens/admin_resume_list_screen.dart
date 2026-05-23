@@ -18,7 +18,6 @@ class _AdminResumeListScreenState
   List<Map<String, dynamic>> filteredResumes = [];
 
   bool loading = true;
-  String search = "";
 
   @override
   void initState() {
@@ -27,9 +26,7 @@ class _AdminResumeListScreenState
   }
 
   Future<void> loadData() async {
-    if (mounted) {
-      setState(() => loading = true);
-    }
+    setState(() => loading = true);
 
     try {
       final data = await Supabase.instance.client
@@ -37,11 +34,11 @@ class _AdminResumeListScreenState
           .select()
           .order('created_at', ascending: false);
 
-      allResumes = List<Map<String, dynamic>>.from(data);
+      allResumes =
+          List<Map<String, dynamic>>.from(data);
+
       filteredResumes = allResumes;
-    } catch (e) {
-      debugPrint("RESUME ERROR: $e");
-    }
+    } catch (_) {}
 
     if (mounted) {
       setState(() => loading = false);
@@ -50,9 +47,8 @@ class _AdminResumeListScreenState
 
   void applySearch(String value) {
     setState(() {
-      search = value;
-
-      filteredResumes = allResumes.where((r) {
+      filteredResumes =
+          allResumes.where((r) {
         final name =
             (r['username'] ?? "")
                 .toString()
@@ -65,39 +61,50 @@ class _AdminResumeListScreenState
     });
   }
 
+  Widget chip(
+    String label,
+    int score,
+    Color color,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: 8,
+      ),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.18),
+        borderRadius:
+            BorderRadius.circular(14),
+      ),
+      child: Text(
+        "$label: $score%",
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return PremiumScreen(
-      title: "Resume Reviews",
-      subtitle: "Admin resume submissions",
-      icon: Icons.picture_as_pdf,
+      title: "Hybrid Resume Reviews",
+      subtitle: "Groq + Manual ATS",
+      icon: Icons.analytics,
       scrollable: false,
-      actions: [
-        IconButton(
-          onPressed: loadData,
-          icon: const Icon(
-            Icons.refresh,
-            color: Colors.white,
-          ),
-        ),
-      ],
       child: Column(
         children: [
           PremiumCard(
-            padding: const EdgeInsets.all(14),
             child: TextField(
               onChanged: applySearch,
               style: const TextStyle(
                 color: Colors.white,
               ),
               decoration: const InputDecoration(
-                hintText: "Search by username...",
+                hintText: "Search username...",
                 hintStyle: TextStyle(
                   color: Colors.white54,
-                ),
-                prefixIcon: Icon(
-                  Icons.search,
-                  color: Colors.white70,
                 ),
                 border: InputBorder.none,
               ),
@@ -114,193 +121,132 @@ class _AdminResumeListScreenState
                       color: AppTheme.primary,
                     ),
                   )
-                : filteredResumes.isEmpty
-                    ? const Center(
-                        child: Text(
-                          "No resumes found",
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 18,
-                          ),
-                        ),
-                      )
-                    : RefreshIndicator(
-                        onRefresh: loadData,
-                        child: ListView.builder(
-                          itemCount:
-                              filteredResumes.length,
-                          itemBuilder: (_, i) {
-                            final r =
-                                filteredResumes[i];
+                : ListView.builder(
+                    itemCount:
+                        filteredResumes.length,
+                    itemBuilder: (_, i) {
+                      final r =
+                          filteredResumes[i];
 
-                            final username =
-                                r['username'] ??
-                                    "Unknown";
+                      final username =
+                          r['username'];
 
-                            final date =
-                                r['created_at'] !=
-                                        null
-                                    ? r['created_at']
-                                        .toString()
-                                        .substring(
-                                            0, 10)
-                                    : "";
+                      final scoreData =
+                          r['resume_scores'];
 
-                            return Padding(
-                              padding:
-                                  const EdgeInsets.only(
-                                      bottom:
-                                          16),
-                              child:
-                                  PremiumCard(
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Container(
-                                          padding:
-                                              const EdgeInsets
-                                                  .all(
-                                                      16),
-                                          decoration:
-                                              BoxDecoration(
-                                            gradient:
-                                                const LinearGradient(
-                                              colors: [
-                                                Colors.red,
-                                                Colors.pink,
-                                              ],
-                                            ),
-                                            borderRadius:
-                                                BorderRadius.circular(
-                                                    20),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.red
-                                                    .withOpacity(
-                                                        0.35),
-                                                blurRadius:
-                                                    18,
-                                              ),
-                                            ],
-                                          ),
-                                          child:
-                                              const Icon(
-                                            Icons
-                                                .picture_as_pdf,
-                                            color:
-                                                Colors.white,
-                                            size:
-                                                30,
-                                          ),
-                                        ),
+                      final manual =
+                          scoreData?['score'] ??
+                              0;
 
-                                        const SizedBox(
-                                            width:
-                                                16),
+                      final ai =
+                          scoreData?['ai_score'] ??
+                              0;
 
-                                        Expanded(
-                                          child:
-                                              Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment
-                                                    .start,
-                                            children: [
-                                              Text(
-                                                username,
-                                                style:
-                                                    const TextStyle(
-                                                  color:
-                                                      Colors.white,
-                                                  fontSize:
-                                                      17,
-                                                  fontWeight:
-                                                      FontWeight.bold,
-                                                ),
-                                              ),
-                                              const SizedBox(
-                                                  height:
-                                                      4),
-                                              Text(
-                                                "Uploaded: $date",
-                                                style:
-                                                    const TextStyle(
-                                                  color:
-                                                      Colors.white70,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-
-                                    const SizedBox(
-                                        height:
-                                            18),
-
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child:
-                                              PremiumButton(
-                                            text:
-                                                "View",
-                                            icon: Icons
-                                                .visibility,
-                                            onTap:
-                                                () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder:
-                                                      (_) =>
-                                                          PdfViewerScreen(
-                                                    url:
-                                                        r['file_url'],
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ),
-
-                                        const SizedBox(
-                                            width:
-                                                12),
-
-                                        Expanded(
-                                          child:
-                                              PremiumButton(
-                                            text:
-                                                "Analyze",
-                                            icon: Icons
-                                                .analytics,
-                                            onTap:
-                                                () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder:
-                                                      (_) =>
-                                                          AdminResumeScoreScreen(
-                                                    username:
-                                                        username,
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                      return Padding(
+                        padding:
+                            const EdgeInsets.only(
+                                bottom: 16),
+                        child: PremiumCard(
+                          child: Column(
+                            children: [
+                              Text(
+                                username,
+                                style:
+                                    const TextStyle(
+                                  color:
+                                      Colors.white,
+                                  fontSize: 18,
+                                  fontWeight:
+                                      FontWeight
+                                          .bold,
                                 ),
                               ),
-                            );
-                          },
+
+                              const SizedBox(
+                                  height: 14),
+
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: chip(
+                                      "Manual",
+                                      manual,
+                                      Colors.orange,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                      width: 10),
+                                  Expanded(
+                                    child: chip(
+                                      "Groq AI",
+                                      ai,
+                                      Colors.green,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(
+                                  height: 16),
+
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child:
+                                        PremiumButton(
+                                      text:
+                                          "View PDF",
+                                      icon: Icons
+                                          .visibility,
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder:
+                                                (_) =>
+                                                    PdfViewerScreen(
+                                              url: r[
+                                                  'file_url'],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+
+                                  const SizedBox(
+                                      width: 12),
+
+                                  Expanded(
+                                    child:
+                                        PremiumButton(
+                                      text:
+                                          "Review",
+                                      icon: Icons
+                                          .analytics,
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder:
+                                                (_) =>
+                                                    AdminResumeScoreScreen(
+                                              username:
+                                                  username,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),

@@ -76,17 +76,19 @@ flutter:
     - .env
     - assets/icon/google.png
     - assets/icon/ai_robot.png
+    - assets/splash.png
+    
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/icon/icon.png"
+  image_path: "assets/splash.png"
              
         
 
 
 flutter_native_splash:
   color: "#4A6CF7"
-  image: assets/icon/icon.png
+  image: assets/splash.png
   android: true
   ios: true
 

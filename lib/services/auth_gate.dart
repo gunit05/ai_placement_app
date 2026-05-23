@@ -169,7 +169,7 @@ class _AuthGateState extends State<AuthGate>
                         ],
                       ),
                       child: Image.asset(
-                        'assets/images/ai_robot.png',
+                        'assets/icon/ai_robot.png',
                       ),
                     ),
 

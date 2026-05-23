@@ -9,15 +9,15 @@ import 'resume_score_screen.dart';
 import 'jobs_screen.dart';
 import 'application_history_screen.dart';
 import 'chatbot_screen.dart';
+import 'aptitude_screen.dart';
+import 'quiz_screen.dart';
 import 'interview_screen.dart';
 import 'coding_interview_screen.dart';
 import 'ai_career_guidance_screen.dart';
 import 'profile_screen.dart';
-import 'notifications_screen.dart';
 import 'home_page.dart';
 
 import '../theme/premium_ui.dart';
-import '../theme/theme_controller.dart';
 
 class DashboardScreen extends StatefulWidget {
   final String username;
@@ -58,7 +58,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> checkOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
-
     final seen = prefs.getBool('seen_onboarding') ?? false;
 
     if (!seen && mounted) {
@@ -107,7 +106,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
 
     final prefs = await SharedPreferences.getInstance();
-
     await prefs.setBool('face_lock', v);
 
     if (!mounted) return;
@@ -119,9 +117,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     try {
       final res = await Supabase.instance.client
           .from('user_skills')
-          .select(
-            'recommended_role, skills',
-          )
+          .select('recommended_role, skills')
           .eq('username', widget.username)
           .maybeSingle();
 
@@ -129,21 +125,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       setState(() {
         aiRole = res?['recommended_role'] ?? "AI Engineer";
-
-        skills = List<String>.from(
-          res?['skills'] ?? [],
-        );
+        skills = List<String>.from(res?['skills'] ?? []);
       });
     } catch (_) {}
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark;
 
     if (loading) {
       return Scaffold(
-        backgroundColor: isDark ? AppTheme.darkBg : AppTheme.lightBg,
+        backgroundColor:
+            isDark ? AppTheme.darkBg : AppTheme.lightBg,
         body: const Center(
           child: CircularProgressIndicator(
             color: AppTheme.primary,
@@ -167,21 +162,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ];
 
     return Scaffold(
-      backgroundColor: isDark ? AppTheme.darkBg : AppTheme.lightBg,
-      body: Stack(
-        children: [
-          IndexedStack(
-            index: index,
-            children: pages,
-          ),
-          Positioned(
-            top: 55,
-            right: 20,
-            child: SafeArea(
-              child: _topThemeButton(),
-            ),
-          ),
-        ],
+      backgroundColor:
+          isDark ? AppTheme.darkBg : AppTheme.lightBg,
+      body: IndexedStack(
+        index: index,
+        children: pages,
       ),
       bottomNavigationBar: _premiumBottomNav(isDark),
     );
@@ -189,12 +174,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _premiumBottomNav(bool isDark) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(
-        16,
-        0,
-        16,
-        20,
-      ),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 20),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         gradient: isDark
@@ -221,21 +201,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       child: Row(
         children: [
-          _navItem(
-            Icons.home_rounded,
-            "Home",
-            0,
-          ),
-          _navItem(
-            Icons.grid_view_rounded,
-            "Explore",
-            1,
-          ),
-          _navItem(
-            Icons.person_rounded,
-            "Profile",
-            2,
-          ),
+          _navItem(Icons.home_rounded, "Home", 0),
+          _navItem(Icons.grid_view_rounded, "Explore", 1),
+          _navItem(Icons.person_rounded, "Profile", 2),
         ],
       ),
     );
@@ -247,17 +215,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
     int itemIndex,
   ) {
     final selected = index == itemIndex;
-
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark;
 
     return Expanded(
       child: GestureDetector(
         onTap: () => setState(() => index = itemIndex),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
-          padding: const EdgeInsets.symmetric(
-            vertical: 14,
-          ),
+          padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
             gradient: selected ? AppTheme.primaryGradient : null,
             borderRadius: BorderRadius.circular(20),
@@ -269,7 +235,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon,
                 color: selected
                     ? Colors.white
-                    : (isDark ? Colors.white54 : Colors.black54),
+                    : (isDark
+                        ? Colors.white54
+                        : Colors.black54),
               ),
               const SizedBox(height: 4),
               Text(
@@ -279,7 +247,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   fontWeight: FontWeight.w600,
                   color: selected
                       ? Colors.white
-                      : (isDark ? Colors.white54 : Colors.black54),
+                      : (isDark
+                          ? Colors.white54
+                          : Colors.black54),
                 ),
               ),
             ],
@@ -289,97 +259,57 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _topThemeButton() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return GestureDetector(
-      onTap: () {
-        themeController.toggleTheme();
-        setState(() {});
-      },
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          gradient: AppTheme.aiGradient,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.primary.withOpacity(0.25),
-              blurRadius: 18,
-            ),
-          ],
-        ),
-        child: Icon(
-          isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-          color: Colors.white,
-          size: 22,
-        ),
-      ),
-    );
-  }
-
   Widget _explorePage() {
     final items = [
       {
-        "title": "Resume",
+        "title": "Upload Resume",
         "icon": Icons.upload_file,
-        "page": ResumeUploadScreen(
-          username: widget.username,
-        ),
+        "page": ResumeUploadScreen(username: widget.username),
       },
       {
-        "title": "Score",
+        "title": "AI ATS Score",
         "icon": Icons.verified,
-        "page": ResumeScoreScreen(
-          username: widget.username,
-        ),
+        "page": ResumeScoreScreen(username: widget.username),
       },
       {
         "title": "Jobs",
         "icon": Icons.work,
-        "page": JobsScreen(
-          username: widget.username,
-        ),
+        "page": JobsScreen(username: widget.username),
       },
       {
         "title": "History",
         "icon": Icons.history,
-        "page": ApplicationHistoryScreen(
-          username: widget.username,
-        ),
+        "page": ApplicationHistoryScreen(username: widget.username),
       },
       {
-        "title": "Chatbot",
+        "title": "AI Aptitude",
+        "icon": Icons.school,
+        "page": AptitudeScreen(username: widget.username),
+      },
+      {
+        "title": "AI Quiz",
+        "icon": Icons.quiz,
+        "page": QuizScreen(username: widget.username),
+      },
+      {
+        "title": "AI Chatbot",
         "icon": Icons.smart_toy,
         "page": const ChatbotScreen(),
       },
       {
         "title": "Interview",
         "icon": Icons.mic,
-        "page": InterviewScreen(
-          username: widget.username,
-        ),
+        "page": InterviewScreen(username: widget.username),
       },
       {
-        "title": "Coding",
+        "title": "Coding Practice",
         "icon": Icons.code,
-        "page": CodingInterviewScreen(
-          username: widget.username,
-        ),
+        "page": CodingInterviewScreen(username: widget.username),
       },
       {
         "title": "Career AI",
         "icon": Icons.psychology,
-        "page": AICareerGuidanceScreen(
-          username: widget.username,
-        ),
-      },
-      {
-        "title": "Alerts",
-        "icon": Icons.notifications,
-        "page": NotificationsScreen(
-          username: widget.username,
-        ),
+        "page": AICareerGuidanceScreen(username: widget.username),
       },
     ];
 
@@ -391,7 +321,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: items.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate:
+            const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 18,
           mainAxisSpacing: 18,
@@ -421,12 +352,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   const SizedBox(height: 16),
                   Text(
                     item['title'] as String,
-                    style: TextStyle(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white
-                          : Colors.black87,
-                      fontWeight: FontWeight.bold,
-                    ),
                   ),
                 ],
               ),
@@ -440,9 +365,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void _go(Widget page) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => page,
-      ),
+      MaterialPageRoute(builder: (_) => page),
     );
   }
 }

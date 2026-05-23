@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:http/http.dart' as http;
 
 import '../theme/premium_ui.dart';
@@ -139,16 +140,16 @@ class _CodingInterviewScreenState extends State<CodingInterviewScreen> {
         )
         .toList();
 
-    currentQuestion = available[random.nextInt(available.length)];
+    currentQuestion = available[random.nextInt(
+      available.length,
+    )];
 
     askedQuestions.add(currentQuestion['id']);
 
     output = '';
     controller.text = starterCode();
 
-    if (mounted) {
-      setState(() {});
-    }
+    if (mounted) setState(() {});
   }
 
   String starterCode() {
@@ -207,6 +208,45 @@ print()
     }
   }
 
+  Widget langChip(
+    BuildContext context,
+    String lang,
+  ) {
+    final selected = selectedLang == lang;
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedLang = lang;
+          controller.text = starterCode();
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 18,
+          vertical: 12,
+        ),
+        decoration: BoxDecoration(
+          gradient: selected ? AppTheme.primaryGradient : null,
+          color: selected ? null : (isDark ? Colors.white10 : Colors.black12),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          lang,
+          style: TextStyle(
+            color: selected
+                ? Colors.white
+                : (isDark ? Colors.white70 : Colors.black87),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> runCode({
     bool checkAnswer = false,
   }) async {
@@ -262,7 +302,9 @@ print()
         );
       } else if (data['compile_output'] != null) {
         resultText = utf8.decode(
-          base64Decode(data['compile_output']),
+          base64Decode(
+            data['compile_output'],
+          ),
         );
       } else {
         resultText = 'No output';
@@ -276,6 +318,15 @@ print()
               '$resultText\n\n❌ Wrong Answer\nExpected: ${currentQuestion['expected']}';
         }
       }
+
+      await Supabase.instance.client.from('coding_interviews').insert({
+        'username': widget.username,
+        'question': currentQuestion['title'],
+        'code': controller.text,
+        'output': resultText,
+        'language': selectedLang,
+        'is_correct': resultText.contains("✅"),
+      });
 
       if (!mounted) return;
 
@@ -297,46 +348,6 @@ print()
     await runCode(checkAnswer: true);
   }
 
-  @override
-  void dispose() {
-    timer?.cancel();
-    controller.dispose();
-    scrollController.dispose();
-    super.dispose();
-  }
-
-  Widget langChip(String lang) {
-    final selected = selectedLang == lang;
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedLang = lang;
-          controller.text = starterCode();
-        });
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 18,
-          vertical: 12,
-        ),
-        decoration: BoxDecoration(
-          gradient: selected ? AppTheme.primaryGradient : null,
-          color: selected ? null : Colors.white10,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          lang,
-          style: TextStyle(
-            color: selected ? Colors.white : Colors.white70,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget actionButton({
     required String text,
     required IconData icon,
@@ -352,7 +363,17 @@ print()
   }
 
   @override
+  void dispose() {
+    timer?.cancel();
+    controller.dispose();
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return PremiumScreen(
       title: "Coding Interview",
       subtitle: "AI coding challenge practice",
@@ -389,8 +410,8 @@ print()
                 ),
                 Text(
                   "⏳ ${formatTime()}",
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
                   ),
@@ -403,10 +424,10 @@ print()
             spacing: 10,
             runSpacing: 10,
             children: [
-              langChip('Python'),
-              langChip('Java'),
-              langChip('C'),
-              langChip('C++'),
+              langChip(context, 'Python'),
+              langChip(context, 'Java'),
+              langChip(context, 'C'),
+              langChip(context, 'C++'),
             ],
           ),
           const SizedBox(height: 14),
@@ -416,8 +437,8 @@ print()
               children: [
                 Text(
                   currentQuestion['title'],
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
@@ -425,8 +446,8 @@ print()
                 const SizedBox(height: 10),
                 Text(
                   currentQuestion['description'],
-                  style: const TextStyle(
-                    color: Colors.white70,
+                  style: TextStyle(
+                    color: isDark ? Colors.white70 : Colors.black54,
                     height: 1.5,
                   ),
                 ),
@@ -434,7 +455,7 @@ print()
                 Text(
                   'Input: ${currentQuestion['input']}',
                   style: const TextStyle(
-                    color: Colors.cyanAccent,
+                    color: Colors.cyan,
                   ),
                 ),
               ],
@@ -444,18 +465,18 @@ print()
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.black87,
+                color: isDark ? Colors.black87 : Colors.white,
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
-                  color: Colors.white12,
+                  color: isDark ? Colors.white12 : Colors.black12,
                 ),
               ),
               child: TextField(
                 controller: controller,
                 expands: true,
                 maxLines: null,
-                style: const TextStyle(
-                  color: Colors.greenAccent,
+                style: TextStyle(
+                  color: isDark ? Colors.greenAccent : Colors.black87,
                   fontFamily: 'monospace',
                   fontSize: 14,
                 ),
@@ -473,8 +494,8 @@ print()
                 controller: scrollController,
                 child: Text(
                   output,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
                     height: 1.5,
                   ),
                 ),

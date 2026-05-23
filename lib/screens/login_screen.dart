@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:local_auth/local_auth.dart';
 
 import 'ai_skill_onboarding_screen.dart';
 import 'admin_dashboard.dart';
@@ -21,7 +19,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-  final LocalAuthentication auth = LocalAuthentication();
 
   bool loading = false;
   bool obscure = true;
@@ -132,59 +129,10 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> authenticateWithBiometric() async {
-    try {
-      final user = Supabase.instance.client.auth.currentUser;
-
-      if (user == null) {
-        _showMsg("Login once first to enable biometric login");
-        return;
-      }
-
-      final supported = await auth.isDeviceSupported();
-      final canCheck = await auth.canCheckBiometrics;
-      final available = await auth.getAvailableBiometrics();
-
-      if (!supported || !canCheck || available.isEmpty) {
-        _showMsg("Biometric not available");
-        return;
-      }
-
-      final authenticated = await auth.authenticate(
-        localizedReason: 'Authenticate with biometrics',
-        options: const AuthenticationOptions(
-          biometricOnly: true,
-          stickyAuth: true,
-        ),
-      );
-
-      if (authenticated) {
-        await _handleUserRouting(
-          user.id,
-          user.email ?? "",
-        );
-      }
-    } catch (_) {
-      _showMsg("Biometric authentication failed");
-    }
-  }
-
   Future<void> signInWithGoogle() async {
     await Supabase.instance.client.auth.signInWithOAuth(
       OAuthProvider.google,
       redirectTo: 'io.supabase.flutter://login-callback',
-    );
-  }
-
-  void _showMsg(String msg) {
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: AppTheme.primary,
-      ),
     );
   }
 
@@ -198,12 +146,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark =
-        Theme.of(context).brightness == Brightness.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? AppTheme.darkBg : AppTheme.lightBg,
+      backgroundColor: isDark ? AppTheme.darkBg : AppTheme.lightBg,
       body: Stack(
         children: [
           Positioned(
@@ -229,7 +175,6 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 children: [
                   const SizedBox(height: 20),
-
                   Container(
                     height: 180,
                     width: 180,
@@ -239,45 +184,36 @@ class _LoginScreenState extends State<LoginScreen> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: AppTheme.primary
-                              .withOpacity(0.35),
+                          color: AppTheme.primary.withOpacity(0.35),
                           blurRadius: 30,
                         ),
                       ],
                     ),
-                    child: Image.asset(
-                      'assets/icons/ai_robot.png',
+                    child: Icon(
+                      Icons.login_rounded,
+                      color: Colors.white,
+                      size: 48,
                     ),
                   ),
-
                   const SizedBox(height: 30),
-
                   Text(
                     "Welcome Back",
                     style: TextStyle(
-                      color: isDark
-                          ? Colors.white
-                          : Colors.black87,
+                      color: isDark ? Colors.white : Colors.black87,
                       fontSize: 34,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-
                   const SizedBox(height: 10),
-
                   Text(
                     "Login to continue your AI placement journey",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: isDark
-                          ? Colors.white70
-                          : Colors.black54,
+                      color: isDark ? Colors.white70 : Colors.black54,
                       fontSize: 15,
                     ),
                   ),
-
                   const SizedBox(height: 36),
-
                   PremiumCard(
                     child: Column(
                       children: [
@@ -287,60 +223,48 @@ class _LoginScreenState extends State<LoginScreen> {
                           icon: Icons.email_rounded,
                           isDark: isDark,
                         ),
-
                         const SizedBox(height: 18),
-
                         _passwordField(isDark),
-
                         const SizedBox(height: 24),
-
                         SizedBox(
                           width: double.infinity,
                           child: PremiumButton(
-                            text: loading
-                                ? "Loading..."
-                                : "Login",
+                            text: loading ? "Loading..." : "Login",
                             onTap: loading ? () {} : login,
                           ),
                         ),
-
                         const SizedBox(height: 16),
-
                         SizedBox(
                           width: double.infinity,
                           child: GestureDetector(
                             onTap: signInWithGoogle,
                             child: Container(
-                              padding:
-                                  const EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                 vertical: 16,
                               ),
                               decoration: BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: isDark
-                                      ? Colors.white12
-                                      : Colors.black12,
+                                  color:
+                                      isDark ? Colors.white12 : Colors.black12,
                                 ),
                               ),
                               child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(
-                                    Icons.g_mobiledata,
-                                    size: 34,
+                                  Image.asset(
+                                    'assets/icon/google.png',
+                                    height: 24,
+                                    width: 24,
                                   ),
-                                  const SizedBox(width: 8),
+                                  const SizedBox(width: 12),
                                   Text(
                                     "Continue with Google",
                                     style: TextStyle(
                                       color: isDark
                                           ? Colors.white
                                           : Colors.black87,
-                                      fontWeight:
-                                          FontWeight.w600,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                 ],
@@ -348,55 +272,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                         ),
-
-                        const SizedBox(height: 16),
-
-                        SizedBox(
-                          width: double.infinity,
-                          child: GestureDetector(
-                            onTap: authenticateWithBiometric,
-                            child: Container(
-                              padding:
-                                  const EdgeInsets.symmetric(
-                                vertical: 16,
-                              ),
-                              decoration: BoxDecoration(
-                                gradient: AppTheme.aiGradient,
-                                borderRadius:
-                                    BorderRadius.circular(20),
-                              ),
-                              child: const Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.fingerprint,
-                                    color: Colors.white,
-                                  ),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    "Biometric Login",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight:
-                                          FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-
                         const SizedBox(height: 14),
-
                         TextButton(
                           onPressed: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) =>
-                                    const SignupScreen(),
+                                builder: (_) => const SignupScreen(),
                               ),
                             );
                           },
@@ -404,14 +286,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             "Create new account",
                           ),
                         ),
-
                         TextButton(
                           onPressed: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) =>
-                                    const ForgotPasswordScreen(),
+                                builder: (_) => const ForgotPasswordScreen(),
                               ),
                             );
                           },
@@ -446,8 +326,7 @@ class _LoginScreenState extends State<LoginScreen> {
         hintText: hint,
         prefixIcon: Icon(icon),
         filled: true,
-        fillColor:
-            isDark ? Colors.white10 : Colors.grey.shade100,
+        fillColor: isDark ? Colors.white10 : Colors.grey.shade100,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide.none,
@@ -468,9 +347,7 @@ class _LoginScreenState extends State<LoginScreen> {
         prefixIcon: const Icon(Icons.lock_rounded),
         suffixIcon: IconButton(
           icon: Icon(
-            obscure
-                ? Icons.visibility_off
-                : Icons.visibility,
+            obscure ? Icons.visibility_off : Icons.visibility,
           ),
           onPressed: () {
             setState(() {
@@ -479,8 +356,7 @@ class _LoginScreenState extends State<LoginScreen> {
           },
         ),
         filled: true,
-        fillColor:
-            isDark ? Colors.white10 : Colors.grey.shade100,
+        fillColor: isDark ? Colors.white10 : Colors.grey.shade100,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide.none,

@@ -6,266 +6,473 @@ Future<void> showFeedbackDialog({
   required String username,
   required VoidCallback onSuccess,
 }) async {
-  final TextEditingController controller = TextEditingController();
+  final controller = TextEditingController();
+  final scrollController = ScrollController();
 
-  bool loading = false;
+  bool sending = false;
 
   await showDialog(
     context: context,
-    barrierDismissible: !loading,
     builder: (dialogContext) {
       return StatefulBuilder(
         builder: (context, setState) {
+          final isDark =
+              Theme.of(context).brightness ==
+                  Brightness.dark;
+
           return Dialog(
             backgroundColor: Colors.transparent,
             insetPadding: const EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 24,
+              horizontal: 12,
+              vertical: 20,
             ),
-            child: Stack(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                    gradient: LinearGradient(
-                      colors: [
-                        const Color(0xff141E61).withOpacity(0.95),
-                        const Color(0xff0B0F2E).withOpacity(0.98),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.08),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.deepPurple.withOpacity(0.30),
-                        blurRadius: 28,
-                        spreadRadius: 4,
-                      ),
-                    ],
-                  ),
-                ),
-                Positioned(
-                  right: -20,
-                  bottom: 40,
-                  child: IgnorePointer(
-                    child: Opacity(
-                      opacity: 0.05,
-                      child: Image.asset(
-                        'assets/icon/ai_robot.png',
-                        width: 180,
-                        fit: BoxFit.contain,
-                      ),
+            child: Container(
+              height: 700,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(28),
+                color: isDark
+                    ? const Color(0xff111827)
+                    : Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    blurRadius: 30,
+                    color: Colors.black.withValues(
+                      alpha: 0.18,
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(18),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: const LinearGradient(
-                            colors: [
-                              Colors.pink,
-                              Colors.deepPurple,
-                            ],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.purple.withOpacity(0.35),
-                              blurRadius: 20,
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.feedback,
-                          color: Colors.white,
-                          size: 34,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        "Send Feedback",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        "Help us improve your AI Placement App experience.",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white70,
-                          height: 1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      TextField(
-                        controller: controller,
-                        maxLines: 5,
-                        style: const TextStyle(
-                          color: Colors.white,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: "Write your feedback...",
-                          hintStyle: const TextStyle(
-                            color: Colors.white54,
-                          ),
-                          prefixIcon: const Padding(
-                            padding: EdgeInsets.only(bottom: 80),
-                            child: Icon(
-                              Icons.edit_note,
-                              color: Colors.white70,
-                            ),
-                          ),
-                          filled: true,
-                          fillColor: Colors.white.withOpacity(0.08),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: loading
-                                  ? null
-                                  : () => Navigator.pop(dialogContext),
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(
-                                  color: Colors.white.withOpacity(0.20),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(18),
-                                ),
-                              ),
-                              child: const Text(
-                                "Cancel",
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: loading
-                                  ? null
-                                  : () async {
-                                      if (controller.text.trim().isEmpty) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                              "Please write feedback",
-                                            ),
-                                          ),
-                                        );
-                                        return;
-                                      }
-
-                                      setState(() {
-                                        loading = true;
-                                      });
-
-                                      try {
-                                        await Supabase.instance.client
-                                            .from('feedback')
-                                            .insert({
-                                          'user': username,
-                                          'message': controller.text.trim(),
-                                          'status': 'pending',
-                                          'time':
-                                              DateTime.now().toIso8601String(),
-                                        });
-
-                                        if (context.mounted) {
-                                          Navigator.pop(dialogContext);
-
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                "Feedback submitted ✅",
-                                              ),
-                                            ),
-                                          );
-                                        }
-
-                                        onSuccess();
-                                      } catch (e) {
-                                        if (context.mounted) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                "Submission failed ❌",
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                      } finally {
-                                        if (context.mounted) {
-                                          setState(() {
-                                            loading = false;
-                                          });
-                                        }
-                                      }
-                                    },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.deepPurpleAccent,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(18),
-                                ),
-                              ),
-                              child: loading
-                                  ? const SizedBox(
-                                      width: 22,
-                                      height: 22,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.5,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : const Text(
-                                      "Submit",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                            ),
-                          ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 18,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xff7C3AED),
+                          Color(0xff2563EB),
                         ],
                       ),
-                    ],
+                      borderRadius:
+                          const BorderRadius.vertical(
+                        top: Radius.circular(28),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const CircleAvatar(
+                          radius: 22,
+                          backgroundColor:
+                              Colors.white24,
+                          child: Icon(
+                            Icons.support_agent,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment:
+                                CrossAxisAlignment
+                                    .start,
+                            children: const [
+                              Text(
+                                "Support Chat",
+                                style: TextStyle(
+                                  color:
+                                      Colors.white,
+                                  fontSize: 18,
+                                  fontWeight:
+                                      FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                "Admin replies here",
+                                style: TextStyle(
+                                  color:
+                                      Colors.white70,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () =>
+                              Navigator.pop(
+                                  dialogContext),
+                          icon: const Icon(
+                            Icons.close,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+
+                  Expanded(
+                    child: StreamBuilder<List<Map<String, dynamic>>>(
+                      stream: Supabase.instance.client
+                          .from('feedback')
+                          .stream(
+                            primaryKey: ['id'],
+                          )
+                          .eq('user', username)
+                          .order(
+                            'time',
+                            ascending: true,
+                          ),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return const Center(
+                            child:
+                                CircularProgressIndicator(),
+                          );
+                        }
+
+                        final messages =
+                            snapshot.data!;
+
+                        WidgetsBinding.instance
+                            .addPostFrameCallback((_) {
+                          if (scrollController
+                              .hasClients) {
+                            scrollController
+                                .jumpTo(
+                              scrollController
+                                  .position
+                                  .maxScrollExtent,
+                            );
+                          }
+                        });
+
+                        if (messages.isEmpty) {
+                          return Center(
+                            child: Text(
+                              "Start a conversation",
+                              style: TextStyle(
+                                color: isDark
+                                    ? Colors.white70
+                                    : Colors.black54,
+                              ),
+                            ),
+                          );
+                        }
+
+                        return ListView.builder(
+                          controller:
+                              scrollController,
+                          padding:
+                              const EdgeInsets.all(
+                                  16),
+                          itemCount:
+                              messages.length,
+                          itemBuilder:
+                              (_, index) {
+                            final item =
+                                messages[index];
+
+                            final userMsg =
+                                item['message'] ??
+                                    "";
+
+                            final adminReply =
+                                item['reply'] ??
+                                    "";
+
+                            final time =
+                                item['time']
+                                        ?.toString() ??
+                                    "";
+
+                            return Column(
+                              children: [
+                                Align(
+                                  alignment:
+                                      Alignment
+                                          .centerRight,
+                                  child:
+                                      _chatBubble(
+                                    text: userMsg,
+                                    time: time,
+                                    isUser: true,
+                                    isDark:
+                                        isDark,
+                                  ),
+                                ),
+                                                                if (adminReply
+                                    .toString()
+                                    .isNotEmpty)
+                                  Align(
+                                    alignment:
+                                        Alignment
+                                            .centerLeft,
+                                    child:
+                                        _chatBubble(
+                                      text:
+                                          adminReply,
+                                      time: time,
+                                      isUser:
+                                          false,
+                                      isDark:
+                                          isDark,
+                                    ),
+                                  ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+
+                  Container(
+                    padding:
+                        const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? const Color(
+                              0xff1F2937)
+                          : const Color(
+                              0xffF3F4F6),
+                      borderRadius:
+                          const BorderRadius.vertical(
+                        bottom:
+                            Radius.circular(28),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller:
+                                controller,
+                            style: TextStyle(
+                              color: isDark
+                                  ? Colors.white
+                                  : Colors.black87,
+                            ),
+                            decoration:
+                                InputDecoration(
+                              hintText:
+                                  "Type message...",
+                              hintStyle:
+                                  TextStyle(
+                                color: isDark
+                                    ? Colors
+                                        .white54
+                                    : Colors
+                                        .black45,
+                              ),
+                              filled: true,
+                              fillColor:
+                                  isDark
+                                      ? Colors
+                                          .white10
+                                      : Colors
+                                          .white,
+                              border:
+                                  OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(
+                                        20),
+                                borderSide:
+                                    BorderSide.none,
+                              ),
+                              contentPadding:
+                                  const EdgeInsets.symmetric(
+                                horizontal:
+                                    16,
+                                vertical:
+                                    14,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(width: 10),
+
+                        GestureDetector(
+                          onTap: sending
+                              ? null
+                              : () async {
+                                  if (controller
+                                      .text
+                                      .trim()
+                                      .isEmpty) {
+                                    return;
+                                  }
+
+                                  setState(() {
+                                    sending =
+                                        true;
+                                  });
+
+                                  try {
+                                    await Supabase
+                                        .instance
+                                        .client
+                                        .from(
+                                            'feedback')
+                                        .insert({
+                                      'user':
+                                          username,
+                                      'message':
+                                          controller
+                                              .text
+                                              .trim(),
+                                      'reply': '',
+                                      'status':
+                                          'pending',
+                                      'time': DateTime
+                                              .now()
+                                          .toIso8601String(),
+                                    });
+
+                                    controller
+                                        .clear();
+
+                                    onSuccess();
+                                  } catch (e) {
+                                    debugPrint(
+                                        "$e");
+                                  }
+
+                                  setState(() {
+                                    sending =
+                                        false;
+                                  });
+                                },
+                          child: Container(
+                            padding:
+                                const EdgeInsets.all(
+                                    16),
+                            decoration:
+                                const BoxDecoration(
+                              gradient:
+                                  LinearGradient(
+                                colors: [
+                                  Color(
+                                      0xff7C3AED),
+                                  Color(
+                                      0xff2563EB),
+                                ],
+                              ),
+                              shape:
+                                  BoxShape.circle,
+                            ),
+                            child: sending
+                                ? const SizedBox(
+                                    width:
+                                        20,
+                                    height:
+                                        20,
+                                    child:
+                                        CircularProgressIndicator(
+                                      strokeWidth:
+                                          2,
+                                      color: Colors
+                                          .white,
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.send,
+                                    color: Colors
+                                        .white,
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         },
       );
     },
+  );
+}
+
+Widget _chatBubble({
+  required String text,
+  required String time,
+  required bool isUser,
+  required bool isDark,
+}) {
+  return Container(
+    margin: const EdgeInsets.only(
+      bottom: 12,
+    ),
+    padding: const EdgeInsets.all(14),
+    constraints: const BoxConstraints(
+      maxWidth: 280,
+    ),
+    decoration: BoxDecoration(
+      gradient: isUser
+          ? const LinearGradient(
+              colors: [
+                Color(0xff7C3AED),
+                Color(0xff2563EB),
+              ],
+            )
+          : null,
+      color: isUser
+          ? null
+          : (isDark
+              ? Colors.white10
+              : Colors.grey.shade200),
+      borderRadius: BorderRadius.circular(
+          20),
+    ),
+    child: Column(
+      crossAxisAlignment:
+          CrossAxisAlignment.start,
+      children: [
+        if (!isUser)
+          const Text(
+            "Admin",
+            style: TextStyle(
+              color: Colors.cyan,
+              fontWeight:
+                  FontWeight.bold,
+            ),
+          ),
+
+        if (!isUser)
+          const SizedBox(height: 6),
+
+        Text(
+          text,
+          style: TextStyle(
+            color: isUser
+                ? Colors.white
+                : (isDark
+                    ? Colors.white
+                    : Colors.black87),
+            height: 1.4,
+          ),
+        ),
+
+        const SizedBox(height: 8),
+
+        Text(
+          time.length > 16
+              ? time.substring(0, 16)
+              : time,
+          style: TextStyle(
+            fontSize: 11,
+            color: isUser
+                ? Colors.white70
+                : Colors.grey,
+          ),
+        ),
+      ],
+    ),
   );
 }

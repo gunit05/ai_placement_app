@@ -6,11 +6,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:local_auth/local_auth.dart';
+
 import 'premium_screen.dart' as premium;
 import 'login_screen.dart';
 import 'terms_privacy_screen.dart';
+
 import '../widgets/feedback_dialog.dart';
 import '../theme/premium_ui.dart';
+import '../theme/theme_controller.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String username;
@@ -27,8 +30,7 @@ class ProfileScreen extends StatefulWidget {
   });
 
   @override
-  State<ProfileScreen> createState() =>
-      _ProfileScreenState();
+  State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen>
@@ -102,12 +104,9 @@ class _ProfileScreenState extends State<ProfileScreen>
 
       final supported = await auth.isDeviceSupported();
       final canCheck = await auth.canCheckBiometrics;
-      final available =
-          await auth.getAvailableBiometrics();
+      final available = await auth.getAvailableBiometrics();
 
-      if (!supported ||
-          !canCheck ||
-          available.isEmpty) {
+      if (!supported || !canCheck || available.isEmpty) {
         showMsg("Biometric not available");
         return;
       }
@@ -134,8 +133,7 @@ class _ProfileScreenState extends State<ProfileScreen>
       showMsg("Biometric authentication failed");
     }
   }
-
-  void showMsg(String msg) {
+    void showMsg(String msg) {
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -160,18 +158,16 @@ class _ProfileScreenState extends State<ProfileScreen>
                 Brightness.dark;
 
         return AlertDialog(
-          backgroundColor: isDark
-              ? AppTheme.darkCard
-              : Colors.white,
+          backgroundColor:
+              isDark ? AppTheme.darkCard : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
           ),
           title: Text(
             "About App",
             style: TextStyle(
-              color: isDark
-                  ? Colors.white
-                  : Colors.black87,
+              color:
+                  isDark ? Colors.white : Colors.black87,
             ),
           ),
           content: Text(
@@ -271,8 +267,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           ),
     );
   }
-
-  @override
+    @override
   Widget build(BuildContext context) {
     final isDark =
         Theme.of(context).brightness == Brightness.dark;
@@ -312,8 +307,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                               BorderRadius.circular(35),
                           boxShadow: [
                             BoxShadow(
-                              color: AppTheme.primary
-                                  .withOpacity(
+                              color: AppTheme.primary.withOpacity(
                                 0.15 +
                                     (glowController.value *
                                         0.15),
@@ -341,9 +335,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                   backgroundImage:
                                       imagePath != null
                                           ? FileImage(
-                                              File(
-                                                imagePath!,
-                                              ),
+                                              File(imagePath!),
                                             )
                                           : null,
                                   child: imagePath == null
@@ -431,25 +423,41 @@ class _ProfileScreenState extends State<ProfileScreen>
                   ),
 
                   const SizedBox(height: 24),
-
-                  glassCard(
+                                    glassCard(
                     child: Padding(
                       padding: const EdgeInsets.all(10),
                       child: Column(
                         children: [
                           settingTile(
+                            isDark
+                                ? Icons.dark_mode
+                                : Icons.light_mode,
+                            "Dark Mode",
+                            [
+                              Colors.deepPurple,
+                              Colors.blue,
+                            ],
+                            trailing: Switch(
+                              value: isDark,
+                              activeColor: AppTheme.primary,
+                              onChanged: (_) {
+                                themeController.toggleTheme();
+                                setState(() {});
+                              },
+                            ),
+                          ),
+
+                          settingTile(
                             Icons.fingerprint,
                             "Biometric Lock",
                             [
                               Colors.orange,
-                              Colors.deepOrange
+                              Colors.deepOrange,
                             ],
                             trailing: Switch(
                               value: widget.faceLock,
-                              activeColor:
-                                  AppTheme.primary,
-                              onChanged:
-                                  toggleFaceLock,
+                              activeColor: AppTheme.primary,
+                              onChanged: toggleFaceLock,
                             ),
                           ),
 
@@ -458,13 +466,12 @@ class _ProfileScreenState extends State<ProfileScreen>
                             "Send Feedback",
                             [
                               Colors.pink,
-                              Colors.redAccent
+                              Colors.redAccent,
                             ],
                             onTap: () =>
                                 showFeedbackDialog(
                               context: context,
-                              username:
-                                  widget.username,
+                              username: widget.username,
                               onSuccess: () {},
                             ),
                           ),
@@ -474,7 +481,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                             "Terms & Privacy",
                             [
                               Colors.cyan,
-                              Colors.teal
+                              Colors.teal,
                             ],
                             onTap: () {
                               Navigator.push(
@@ -492,7 +499,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                             "About App",
                             [
                               Colors.amber,
-                              Colors.orange
+                              Colors.orange,
                             ],
                             onTap: showAbout,
                           ),
@@ -502,7 +509,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                             "Logout",
                             [
                               Colors.red,
-                              Colors.redAccent
+                              Colors.redAccent,
                             ],
                             textColor: Colors.red,
                             onTap: () async {
@@ -527,15 +534,12 @@ class _ProfileScreenState extends State<ProfileScreen>
                   ),
 
                   const SizedBox(height: 28),
-
-                  Container(
+                                    Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      gradient:
-                          AppTheme.primaryGradient,
-                      borderRadius:
-                          BorderRadius.circular(30),
+                      gradient: AppTheme.primaryGradient,
+                      borderRadius: BorderRadius.circular(30),
                     ),
                     child: Column(
                       crossAxisAlignment:
@@ -546,8 +550,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 24,
-                            fontWeight:
-                                FontWeight.bold,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -564,9 +567,9 @@ class _ProfileScreenState extends State<ProfileScreen>
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                               builder: (_) => premium.PremiumScreen(
-                                  username:
-                                      widget.username,
+                                builder: (_) =>
+                                    premium.PremiumScreen(
+                                  username: widget.username,
                                 ),
                               ),
                             );
@@ -577,20 +580,16 @@ class _ProfileScreenState extends State<ProfileScreen>
                               horizontal: 22,
                               vertical: 14,
                             ),
-                            decoration:
-                                BoxDecoration(
+                            decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius:
-                                  BorderRadius
-                                      .circular(20),
+                                  BorderRadius.circular(20),
                             ),
                             child: const Text(
                               "Upgrade Now",
                               style: TextStyle(
-                                color:
-                                    Color(0xff4A00E0),
-                                fontWeight:
-                                    FontWeight.bold,
+                                color: Color(0xff4A00E0),
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),

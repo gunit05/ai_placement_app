@@ -23,6 +23,11 @@ class _AdminResumeScoreScreenState
   bool saving = false;
   bool loading = true;
 
+  int aiScore = 0;
+  String aiSuggestions = "";
+  String strengths = "";
+  String missingSkills = "";
+
   @override
   void initState() {
     super.initState();
@@ -39,10 +44,22 @@ class _AdminResumeScoreScreenState
 
       if (data != null) {
         scoreController.text =
-            (data['score'] ?? "").toString();
+            (data['score'] ?? 0).toString();
 
         remarksController.text =
             data['remarks'] ?? "";
+
+        aiScore =
+            data['ai_score'] ?? 0;
+
+        aiSuggestions =
+            data['ai_suggestions'] ?? "";
+
+        strengths =
+            data['strengths'] ?? "";
+
+        missingSkills =
+            data['missing_skills'] ?? "";
       }
     } catch (e) {
       debugPrint("LOAD ERROR: $e");
@@ -57,17 +74,12 @@ class _AdminResumeScoreScreenState
     final score =
         int.tryParse(scoreController.text.trim());
 
-    final remarks =
-        remarksController.text.trim();
-
     if (score == null ||
         score < 0 ||
         score > 100) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            "Enter valid score (0-100)",
-          ),
+          content: Text("Enter valid score"),
         ),
       );
       return;
@@ -78,15 +90,12 @@ class _AdminResumeScoreScreenState
     try {
       await Supabase.instance.client
           .from('resume_scores')
-          .upsert(
-        {
-          'username': widget.username,
-          'score': score,
-          'remarks': remarks,
-          'ai_generated': false,
-        },
-        onConflict: 'username',
-      );
+          .update({
+        'score': score,
+        'remarks': remarksController.text.trim(),
+        'admin_override': true,
+      })
+          .eq('username', widget.username);
 
       if (!mounted) return;
 
@@ -102,7 +111,7 @@ class _AdminResumeScoreScreenState
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Error: $e"),
+          content: Text("$e"),
         ),
       );
     }
@@ -118,6 +127,44 @@ class _AdminResumeScoreScreenState
     return Colors.red;
   }
 
+  Widget infoCard({
+    required String title,
+    required String text,
+    required IconData icon,
+    required Color color,
+  }) {
+    return PremiumCard(
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: color),
+              const SizedBox(width: 10),
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight:
+                      FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            text.isEmpty ? "-" : text,
+            style: const TextStyle(
+              color: Colors.white70,
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void dispose() {
     scoreController.dispose();
@@ -131,10 +178,9 @@ class _AdminResumeScoreScreenState
         int.tryParse(scoreController.text) ?? 0;
 
     return PremiumScreen(
-      title: "Resume Score",
-      subtitle: "Admin manual resume evaluation",
+      title: "Hybrid ATS Review",
+      subtitle: "Groq AI + Manual Review",
       icon: Icons.analytics,
-      scrollable: false,
       child: loading
           ? const Center(
               child:
@@ -142,182 +188,240 @@ class _AdminResumeScoreScreenState
                 color: AppTheme.primary,
               ),
             )
-          : Column(
-              children: [
-                PremiumCard(
-                  child: Row(
+          : SingleChildScrollView(
+              child: Column(
+                children: [
+                  PremiumCard(
+                    child: Row(
+                      children: [
+                        Container(
+                          padding:
+                              const EdgeInsets.all(
+                                  16),
+                          decoration:
+                              BoxDecoration(
+                            gradient:
+                                const LinearGradient(
+                              colors: [
+                                Colors.blue,
+                                Colors.purple,
+                              ],
+                            ),
+                            borderRadius:
+                                BorderRadius.circular(
+                                    20),
+                          ),
+                          child: const Icon(
+                            Icons.person,
+                            color: Colors.white,
+                            size: 30,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Text(
+                            widget.username,
+                            style:
+                                const TextStyle(
+                              color:
+                                  Colors.white,
+                              fontSize: 18,
+                              fontWeight:
+                                  FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  Row(
                     children: [
-                      Container(
-                        padding:
-                            const EdgeInsets.all(
-                                16),
-                        decoration:
-                            BoxDecoration(
-                          gradient:
-                              const LinearGradient(
-                            colors: [
-                              Colors.blue,
-                              Colors.purple,
+                      Expanded(
+                        child: PremiumCard(
+                          child: Column(
+                            children: [
+                              Text(
+                                "$previewScore%",
+                                style: TextStyle(
+                                  color:
+                                      scoreColor(
+                                          previewScore),
+                                  fontSize: 42,
+                                  fontWeight:
+                                      FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              const Text(
+                                "Manual / Final Score",
+                                style: TextStyle(
+                                  color:
+                                      Colors.white70,
+                                ),
+                              ),
                             ],
                           ),
-                          borderRadius:
-                              BorderRadius.circular(
-                                  20),
-                        ),
-                        child: const Icon(
-                          Icons.person,
-                          color: Colors.white,
-                          size: 30,
                         ),
                       ),
 
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 14),
 
                       Expanded(
-                        child: Text(
-                          widget.username,
+                        child: PremiumCard(
+                          child: Column(
+                            children: [
+                              Text(
+                                "$aiScore%",
+                                style: TextStyle(
+                                  color:
+                                      scoreColor(
+                                          aiScore),
+                                  fontSize: 42,
+                                  fontWeight:
+                                      FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              const Text(
+                                "Groq AI Score",
+                                style: TextStyle(
+                                  color:
+                                      Colors.white70,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  infoCard(
+                    title: "Missing Skills",
+                    text: missingSkills,
+                    icon: Icons.warning,
+                    color: Colors.orange,
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  infoCard(
+                    title: "AI Strengths",
+                    text: strengths,
+                    icon: Icons.star,
+                    color: Colors.green,
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  infoCard(
+                    title: "Groq Suggestions",
+                    text: aiSuggestions,
+                    icon: Icons.auto_awesome,
+                    color: Colors.purple,
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  PremiumCard(
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller:
+                              scoreController,
+                          keyboardType:
+                              TextInputType
+                                  .number,
+                          onChanged: (_) =>
+                              setState(() {}),
                           style:
                               const TextStyle(
                             color:
                                 Colors.white,
-                            fontSize: 18,
-                            fontWeight:
-                                FontWeight.bold,
+                          ),
+                          decoration:
+                              InputDecoration(
+                            hintText:
+                                "Enter final manual score",
+                            hintStyle:
+                                const TextStyle(
+                              color:
+                                  Colors.white54,
+                            ),
+                            prefixIcon:
+                                const Icon(
+                              Icons.score,
+                              color: Colors
+                                  .white70,
+                            ),
+                            filled: true,
+                            fillColor:
+                                Colors.white10,
+                            border:
+                                OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(
+                                      18),
+                              borderSide:
+                                  BorderSide.none,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
 
-                const SizedBox(height: 18),
+                        const SizedBox(height: 16),
 
-                PremiumCard(
-                  child: Column(
-                    children: [
-                      Text(
-                        "$previewScore%",
-                        style: TextStyle(
-                          color: scoreColor(
-                              previewScore),
-                          fontSize: 54,
-                          fontWeight:
-                              FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        "Live Preview Score",
-                        style: TextStyle(
-                          color:
-                              Colors.white70,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 18),
-
-                PremiumCard(
-                  child: Column(
-                    children: [
-                      TextField(
-                        controller:
-                            scoreController,
-                        keyboardType:
-                            TextInputType
-                                .number,
-                        onChanged: (_) =>
-                            setState(() {}),
-                        style:
-                            const TextStyle(
-                          color:
-                              Colors.white,
-                        ),
-                        decoration:
-                            InputDecoration(
-                          hintText:
-                              "Enter score (0-100)",
-                          hintStyle:
+                        TextField(
+                          controller:
+                              remarksController,
+                          maxLines: 5,
+                          style:
                               const TextStyle(
                             color:
-                                Colors.white54,
+                                Colors.white,
                           ),
-                          prefixIcon:
-                              const Icon(
-                            Icons.score,
-                            color: Colors
-                                .white70,
-                          ),
-                          filled: true,
-                          fillColor:
-                              Colors.white10,
-                          border:
-                              OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(
-                                    18),
-                            borderSide:
-                                BorderSide.none,
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      TextField(
-                        controller:
-                            remarksController,
-                        maxLines: 5,
-                        style:
-                            const TextStyle(
-                          color:
-                              Colors.white,
-                        ),
-                        decoration:
-                            InputDecoration(
-                          hintText:
-                              "Enter remarks...",
-                          hintStyle:
-                              const TextStyle(
-                            color:
-                                Colors.white54,
-                          ),
-                          prefixIcon:
-                              const Icon(
-                            Icons.comment,
-                            color: Colors
-                                .white70,
-                          ),
-                          filled: true,
-                          fillColor:
-                              Colors.white10,
-                          border:
-                              OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(
-                                    18),
-                            borderSide:
-                                BorderSide.none,
+                          decoration:
+                              InputDecoration(
+                            hintText:
+                                "Admin remarks...",
+                            hintStyle:
+                                const TextStyle(
+                              color:
+                                  Colors.white54,
+                            ),
+                            filled: true,
+                            fillColor:
+                                Colors.white10,
+                            border:
+                                OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(
+                                      18),
+                              borderSide:
+                                  BorderSide.none,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
 
-                const Spacer(),
+                  const SizedBox(height: 24),
 
-                PremiumButton(
-                  text: saving
-                      ? "Saving..."
-                      : "Save Score",
-                  icon: Icons.save,
-                  onTap:
-                      saving ? () {} : saveScore,
-                ),
-              ],
+                  PremiumButton(
+                    text: saving
+                        ? "Saving..."
+                        : "Save Final Review",
+                    icon: Icons.save,
+                    onTap:
+                        saving ? () {} : saveScore,
+                  ),
+                ],
+              ),
             ),
     );
   }

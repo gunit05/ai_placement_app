@@ -1,93 +1,195 @@
 🚀 AI Placement App – AI Powered Career Growth Platform
 
-A powerful Flutter + Supabase based intelligent placement preparation platform built to help students and job seekers improve their employability through AI interviews, resume analysis, aptitude preparation, coding practice, job tracking, and career guidance.
+A powerful Flutter + Supabase + AI powered intelligent placement preparation platform built to help students and job seekers improve employability through:
 
-This app combines AI-powered automation + modern premium UI + real interview simulation to create a complete placement ecosystem.
+AI interviews
+Resume ATS analysis
+Coding interview practice
+Aptitude preparation
+Job tracking
+Career guidance
+AI chatbot assistance
+Admin review systems
+
+This platform combines AI automation + premium modern UI + real interview simulation + analytics to create a complete smart placement ecosystem.
 
 ✨ Key Features
 🎯 Placement Preparation
 📚 Aptitude Preparation Module
-🧠 Interactive Quiz System
-💻 Coding Practice & Interview Questions
-📈 Placement Readiness Tracking
-🎯 Career Guidance Recommendations
-🎥 AI Suggested Learning Videos
-📄 Resume & Profile Analysis
-🔍 AI Resume Score Analysis
-📄 Resume Upload & ATS Scoring
-📊 Profile Analytics Dashboard
-🧠 AI Skill Recommendations
-📈 Resume Improvement Suggestions
-📝 Admin Resume Manual Scoring
-🤖 AI Interview System (Premium Feature 🔥)
+Topic-based aptitude preparation
+Interactive MCQ quiz engine
+Live scoring
+Performance analytics
+Placement readiness tracking
+💻 Coding Practice & Interview Preparation
 
-A complete smart interview simulation engine.
+Interactive coding interview simulator with real code execution.
 
 Features:
-🎤 Speech-to-Text Answer Detection
-🔊 AI Voice Questions (Text-to-Speech)
-⏱️ Auto Timer Per Question
-⏭️ Auto Next Question Flow
-📊 Live Answer Scoring
-🧠 AI Performance Feedback
-📈 Interview Result Analytics
-📄 PDF Interview Report Generation
-💡 Improvement Suggestions
+
+Python / Java / C / C++ coding support
+Judge0 code execution integration
+Live code compilation
+Coding interview timer
+Random interview questions
+Output validation
+Correct / wrong answer detection
+Auto question switching
+Admin coding submission review
+Code + output storage in database
+Coding analytics tracking
+📄 Resume & ATS Analysis
+🤖 Hybrid ATS Resume Analysis (Latest 🔥)
+
+Advanced resume intelligence engine combining:
+
+Manual ATS Engine
+Keyword matching
+Skills gap analysis
+Missing skills detection
+ATS compatibility scoring
+AI ATS Engine (Groq AI)
+
+Powered by Groq API.
+
+Features:
+
+AI resume analysis
+Resume strengths detection
+ATS suggestions
+Role-specific scoring
+Intelligent resume feedback
+Resume System Features
+PDF resume upload
+Resume parsing
+Resume text extraction
+Resume bucket storage (Supabase Storage)
+Resume analytics dashboard
+Resume improvement suggestions
+Admin resume review
+Manual admin override scoring
+Resume PDF preview
+PDF report generation
+🎤 AI Interview System (Premium Feature 🔥)
+
+Complete smart interview simulation engine.
+
+Features:
+
+Speech-to-text answer recognition
+AI voice questions (Text-to-Speech)
+Auto timer per question
+Auto next question flow
+Live answer scoring
+AI performance analytics
+Interview feedback
+Improvement suggestions
+Interview result dashboard
+PDF interview report generation
+Watermark + date/time reports
 🎥 Video Interview System
 
-Real interview simulation with video capture.
+Real interview simulation with front camera capture.
 
 Features:
-📷 Front Camera Interview Recording
-🎥 Auto Start / Auto Stop Recording
-☁️ Cloudinary Video Upload
-🔗 Video URL Storage in Supabase
-▶️ Replay Interview Sessions
-📊 Video Performance Tracking
-💼 Job & Placement Management
-💼 Live Job Listings
-📝 Job Applications Tracking
-⭐ Shortlist Dashboard
-📍 Job Role Recommendations
-📊 Application Status Monitoring
-🔔 Placement Alerts
-👤 Authentication & Security
-🔐 Supabase Authentication
-🔑 Login / Signup / Forgot Password / Reset Password
-👤 Profile Management
-📷 Profile Photo Upload
-🔒 Biometric Face Lock Authentication
-🛡️ Secure Session Handling
+
+Front camera interview recording
+Auto start / auto stop recording
+Video replay support
+Cloudinary video upload
+Supabase video URL storage
+Video performance review
+Admin monitoring support
 🤖 AI Assistant
 
-Built-in intelligent chatbot for guidance.
+Built-in intelligent chatbot assistant.
 
-AI Assistant helps with:
-Career advice
-Resume suggestions
+Helps with:
+
+Career guidance
 Interview preparation
+Resume suggestions
 Skill recommendations
-Job guidance
 Placement FAQs
+Job guidance
+Learning roadmap
+💼 Jobs & Placement Management
+
+Features:
+
+Live job listings
+Job applications tracker
+Shortlisting dashboard
+Job recommendations
+Placement alerts
+Application status tracking
+Career role suggestions
+👤 Authentication & Security
+
+Secure auth system powered by Supabase.
+
+Features:
+
+Login
+Signup
+Forgot password
+Password reset flow
+Smart auth gate
+Session persistence
+Secure logout
+Biometric authentication
+Face lock authentication
+Profile management
+Profile image upload
+💬 Feedback & Support Chat (Latest 🔥)
+
+Modern real-time support chat system.
+
+Features:
+
+User feedback messaging
+Admin reply system
+Real-time chat updates
+Chat bubble UI
+Support conversation history
+Pending/replied status tracking
+Dark/light mode support
 🛠️ Admin Dashboard
 
-Powerful admin controls.
+Powerful admin control system.
 
 Admin Features:
-📊 Analytics Dashboard
-👥 User Monitoring
-💼 Add / Manage Jobs
-📄 Resume Review
-⭐ Shortlisting Candidates
-📈 Logs Analytics
-📝 Feedback Monitoring
-🎨 UI Highlights
-Premium Glassmorphism UI
-Animated Splash Screen
-Premium Dashboard Design
-Gradient Cards & Modern Layouts
-Smooth Animations
-Mobile-first UX
+
+User monitoring
+Analytics dashboard
+Resume review
+Resume manual scoring
+Resume override scoring
+Coding interview review
+Coding submissions monitoring
+Job management
+Shortlisting candidates
+Feedback chat monitoring
+Application analytics
+System insights
+🎨 Premium UI Highlights
+
+Modern futuristic premium design.
+
+Features:
+
+Glassmorphism UI
+Animated splash screen
+Premium dashboard
+AI glowing backgrounds
+Smooth animations
+Gradient cards
+Floating effects
+Coding IDE style interface
+Chat-style support system
+Responsive layouts
+Light mode / dark mode support
+Premium onboarding visuals
 🛠️ Tech Stack
 Frontend
 Flutter (Dart)
@@ -98,38 +200,82 @@ PostgreSQL
 Authentication
 Supabase Auth
 Storage
-Cloudinary
 Supabase Storage
-AI / Features
+Cloudinary
+AI / APIs
+Groq API
+Google Generative AI
+Judge0 API
+Libraries
 speech_to_text
 flutter_tts
+local_auth
 camera
 video_player
 image_picker
-local_auth
-pdf generation
+file_picker
+syncfusion_flutter_pdf
+pdf
+printing
+flutter_dotenv
+fl_chart
 🔥 Latest Updates
 Version Highlights
+AI & Resume
 
-✅ Premium UI redesign across app
+✅ Hybrid ATS Resume Scoring
+✅ Groq AI Resume Intelligence
+✅ AI Strengths & Suggestions
+✅ Resume bucket storage
+✅ Resume admin override scoring
+✅ Resume PDF preview fixes
+
+Coding System
+
+✅ Judge0 coding execution integration
+✅ Multi-language coding interview
+✅ Coding timer
+✅ Random question generator
+✅ Coding admin review dashboard
+✅ Submission logging to database
+✅ Code + output tracking
+
+Feedback System
+
+✅ Real-time support chat
+✅ Admin reply visibility
+✅ Modern chat UI redesign
+
+UI/UX
+
+✅ Premium UI redesign
 ✅ Animated futuristic splash screen
-✅ Profile photo upload support
-✅ Face Lock biometric authentication
-✅ Smart Auth Gate
-✅ AI Chatbot assistant
-✅ Resume analytics improvements
-✅ Interview analytics dashboard
-✅ Cloudinary video upload integration
-✅ Video interview recording flow
-✅ Supabase video URL storage
-✅ Duplicate username DB issue fixed
-✅ Interview scoring improvements
-✅ PDF report generation
-✅ Watermark + date/time in reports
-✅ Feedback submission system
-✅ Admin analytics modules
-✅ Forgot password + reset flow
-✅ Secure authentication improvements
+✅ Modern dashboard redesign
+✅ Light/dark mode support
+✅ Profile redesign
+✅ Premium coding interface
+
+Video Interview
+
+✅ Video interview recording
+✅ Cloudinary upload
+✅ Video URL storage
+✅ Replay support
+
+Security/Auth
+
+✅ Smart auth gate
+✅ Face lock biometric authentication
+✅ Forgot password flow
+✅ Reset password flow
+✅ Secure session handling
+
+Admin
+
+✅ Resume review modules
+✅ Coding monitoring
+✅ Feedback management
+✅ Analytics dashboard
 
 📂 Project Structure
 lib/
@@ -142,20 +288,26 @@ lib/
  │    ├── chatbot_screen.dart
  │    ├── aptitude_screen.dart
  │    ├── quiz_screen.dart
+ │    ├── coding_interview_screen.dart
  │    ├── interview_screen.dart
  │    ├── interview_result_screen.dart
+ │    ├── resume_upload_screen.dart
+ │    ├── resume_score_screen.dart
  │    ├── jobs_screen.dart
  │    ├── shortlist_dashboard.dart
  │    └── admin/
+ │         ├── admin_resume_list_screen.dart
+ │         ├── admin_coding_list_screen.dart
  │
  ├── widgets/
- │    ├── auth_gate.dart
  │    ├── feedback_dialog.dart
  │
  ├── services/
+ │    ├── auth_gate.dart
  │
  ├── theme/
- │    └── premium_ui.dart
+ │    ├── premium_ui.dart
+ │    ├── theme_controller.dart
  │
  └── main.dart
 ⚙️ Installation
@@ -167,12 +319,13 @@ flutter run
 
 This application is built to:
 
-✔ Help students prepare for placements
-✔ Simulate real AI-based interviews
-✔ Improve resumes with ATS insights
-✔ Track job applications efficiently
-✔ Provide career guidance using AI
-✔ Make placement preparation smarter and accessible
+✔ Help students prepare smarter for placements
+✔ Simulate real AI interviews
+✔ Improve resumes with ATS intelligence
+✔ Track coding performance
+✔ Provide job recommendations
+✔ Deliver AI-based career guidance
+✔ Make placement preparation modern, smart, and accessible
 
 👨‍💻 Developer
 
@@ -188,6 +341,6 @@ Gunit Raj
 
 If you found this project useful:
 
-Give this repository a STAR ⭐ on GitHub
+⭐ Give this repository a STAR on GitHub
 
 Contributions, suggestions, and feedback are welcome 🚀

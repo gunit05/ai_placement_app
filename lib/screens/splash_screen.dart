@@ -1,50 +1,48 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../services/auth_gate.dart';
-import '../theme/premium_ui.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  State<SplashScreen> createState() =>
+      _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
+class _SplashScreenState
+    extends State<SplashScreen>
     with TickerProviderStateMixin {
-  late AnimationController glowController;
   late AnimationController floatController;
+  late AnimationController glowController;
+  late AnimationController progressController;
 
-  late Animation<double> glowAnim;
   late Animation<double> floatAnim;
+  late Animation<double> glowAnim;
+  late Animation<double> progressAnim;
 
   @override
   void initState() {
     super.initState();
 
-    glowController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 3),
-    );
-
     floatController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 2),
-    );
+      duration: const Duration(seconds: 3),
+    )..repeat(reverse: true);
 
-    glowAnim = Tween<double>(
-      begin: 0.8,
-      end: 1.2,
-    ).animate(
-      CurvedAnimation(
-        parent: glowController,
-        curve: Curves.easeInOut,
-      ),
-    );
+    glowController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+
+    progressController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..forward();
 
     floatAnim = Tween<double>(
-      begin: -12,
-      end: 12,
+      begin: -10,
+      end: 10,
     ).animate(
       CurvedAnimation(
         parent: floatController,
@@ -52,8 +50,25 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    glowController.repeat(reverse: true);
-    floatController.repeat(reverse: true);
+    glowAnim = Tween<double>(
+      begin: 0.85,
+      end: 1.15,
+    ).animate(
+      CurvedAnimation(
+        parent: glowController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    progressAnim = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(
+      CurvedAnimation(
+        parent: progressController,
+        curve: Curves.easeInOut,
+      ),
+    );
 
     Timer(
       const Duration(seconds: 3),
@@ -72,12 +87,13 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
-    glowController.dispose();
     floatController.dispose();
+    glowController.dispose();
+    progressController.dispose();
     super.dispose();
   }
 
-  Widget glowCircle({
+  Widget glowBlob({
     required double size,
     required Color color,
     required double top,
@@ -96,10 +112,14 @@ class _SplashScreenState extends State<SplashScreen>
               height: size,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: color.withOpacity(0.18),
+                color: color.withValues(
+                  alpha: 0.18,
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: color.withOpacity(0.5),
+                    color: color.withValues(
+                      alpha: 0.45,
+                    ),
                     blurRadius: 100,
                     spreadRadius: 20,
                   ),
@@ -111,29 +131,34 @@ class _SplashScreenState extends State<SplashScreen>
       },
     );
   }
-
-  Widget animatedLogo() {
+    Widget animatedLogo() {
     return AnimatedBuilder(
       animation: floatAnim,
       builder: (_, __) {
         return Transform.translate(
           offset: Offset(0, floatAnim.value),
           child: Container(
-            width: 220,
-            height: 220,
+            width: 120,
+            height: 120,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.cyan.withOpacity(0.35),
-                  blurRadius: 60,
-                  spreadRadius: 15,
+                  color: Colors.cyan.withValues(
+                    alpha: 0.35,
+                  ),
+                  blurRadius: 50,
+                  spreadRadius: 10,
                 ),
               ],
             ),
-            child: Image.asset(
-              'assets/splash.png',
-              fit: BoxFit.contain,
+            child: ClipRRect(
+              borderRadius:
+                  BorderRadius.circular(60),
+              child: Image.asset(
+                'assets/splash.png',
+                fit: BoxFit.cover,
+              ),
             ),
           ),
         );
@@ -141,10 +166,98 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 
+  Widget glassCard() {
+    return Container(
+      width: 340,
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0.14),
+            Colors.white.withValues(alpha: 0.06),
+          ],
+        ),
+        border: Border.all(
+          color: Colors.white.withValues(
+            alpha: 0.18,
+          ),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: 0.25,
+            ),
+            blurRadius: 30,
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          animatedLogo(),
+
+          const SizedBox(height: 24),
+
+          const Text(
+            "Welcome Back",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          const Text(
+            "AI Placement Preparation Platform",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 15,
+            ),
+          ),
+
+          const SizedBox(height: 28),
+
+          AnimatedBuilder(
+            animation: progressAnim,
+            builder: (_, __) {
+              return ClipRRect(
+                borderRadius:
+                    BorderRadius.circular(20),
+                child: LinearProgressIndicator(
+                  value: progressAnim.value,
+                  minHeight: 10,
+                  backgroundColor:
+                      Colors.white12,
+                  valueColor:
+                      const AlwaysStoppedAnimation(
+                    Colors.cyanAccent,
+                  ),
+                ),
+              );
+            },
+          ),
+
+          const SizedBox(height: 14),
+
+          const Text(
+            "Loading...",
+            style: TextStyle(
+              color: Colors.white60,
+              fontSize: 13,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.darkBg,
       body: Stack(
         children: [
           Container(
@@ -153,34 +266,38 @@ class _SplashScreenState extends State<SplashScreen>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Color(0xff050816),
-                  Color(0xff101A56),
-                  Color(0xff1A063F),
-                  Color(0xff040B2D),
+                  Color(0xff09090F),
+                  Color(0xff1E1B4B),
+                  Color(0xff312E81),
+                  Color(0xff0F172A),
                 ],
               ),
             ),
           ),
-          glowCircle(
+
+          glowBlob(
             size: 260,
             color: Colors.deepPurple,
             top: -50,
             left: -60,
           ),
-          glowCircle(
+
+          glowBlob(
             size: 220,
             color: Colors.cyan,
-            top: 180,
+            top: 120,
             left: 280,
           ),
-          glowCircle(
+
+          glowBlob(
             size: 240,
             color: Colors.pinkAccent,
             top: 620,
             left: -40,
           ),
+
           Center(
-            child: animatedLogo(),
+            child: glassCard(),
           ),
         ],
       ),

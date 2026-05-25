@@ -6,12 +6,10 @@ class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() =>
-      _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState
-    extends State<SplashScreen>
+class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
   late AnimationController floatController;
   late AnimationController glowController;
@@ -131,7 +129,8 @@ class _SplashScreenState
       },
     );
   }
-    Widget animatedLogo() {
+
+  Widget animatedLogo() {
     return AnimatedBuilder(
       animation: floatAnim,
       builder: (_, __) {
@@ -153,10 +152,9 @@ class _SplashScreenState
               ],
             ),
             child: ClipRRect(
-              borderRadius:
-                  BorderRadius.circular(60),
+              borderRadius: BorderRadius.circular(60),
               child: Image.asset(
-                'assets/splash.png',
+                'assets/icon/app_icon.png',
                 fit: BoxFit.cover,
               ),
             ),
@@ -196,9 +194,7 @@ class _SplashScreenState
         mainAxisSize: MainAxisSize.min,
         children: [
           animatedLogo(),
-
           const SizedBox(height: 24),
-
           const Text(
             "Welcome Back",
             style: TextStyle(
@@ -207,42 +203,33 @@ class _SplashScreenState
               fontWeight: FontWeight.bold,
             ),
           ),
-
           const SizedBox(height: 8),
-
           const Text(
-            "AI Placement Preparation Platform",
+            "AI Placement App",
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white70,
               fontSize: 15,
             ),
           ),
-
           const SizedBox(height: 28),
-
           AnimatedBuilder(
             animation: progressAnim,
             builder: (_, __) {
               return ClipRRect(
-                borderRadius:
-                    BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(20),
                 child: LinearProgressIndicator(
                   value: progressAnim.value,
                   minHeight: 10,
-                  backgroundColor:
-                      Colors.white12,
-                  valueColor:
-                      const AlwaysStoppedAnimation(
+                  backgroundColor: Colors.white12,
+                  valueColor: const AlwaysStoppedAnimation(
                     Colors.cyanAccent,
                   ),
                 ),
               );
             },
           ),
-
           const SizedBox(height: 14),
-
           const Text(
             "Loading...",
             style: TextStyle(
@@ -274,28 +261,24 @@ class _SplashScreenState
               ),
             ),
           ),
-
           glowBlob(
             size: 260,
             color: Colors.deepPurple,
             top: -50,
             left: -60,
           ),
-
           glowBlob(
             size: 220,
             color: Colors.cyan,
             top: 120,
             left: 280,
           ),
-
           glowBlob(
             size: 240,
             color: Colors.pinkAccent,
             top: 620,
             left: -40,
           ),
-
           Center(
             child: glassCard(),
           ),

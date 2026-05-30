@@ -463,7 +463,7 @@ class _ProfileScreenState extends State<ProfileScreen>
 
                           settingTile(
                             Icons.feedback,
-                            "Send Feedback",
+                            "Support & Feedback",
                             [
                               Colors.pink,
                               Colors.redAccent,

@@ -6,12 +6,10 @@ class ShortlistDashboard extends StatefulWidget {
   const ShortlistDashboard({super.key});
 
   @override
-  State<ShortlistDashboard> createState() =>
-      _ShortlistDashboardState();
+  State<ShortlistDashboard> createState() => _ShortlistDashboardState();
 }
 
-class _ShortlistDashboardState
-    extends State<ShortlistDashboard> {
+class _ShortlistDashboardState extends State<ShortlistDashboard> {
   final supabase = Supabase.instance.client;
 
   List<Map<String, dynamic>> applications = [];
@@ -29,15 +27,16 @@ class _ShortlistDashboardState
     }
 
     try {
-      final res = await supabase
-          .from('applications')
-          .select()
-          .order('created_at', ascending: false);
+      final res = await supabase.from('applications').select().order(
+            'created_at',
+            ascending: false,
+          );
 
-      applications =
-          List<Map<String, dynamic>>.from(res);
+      applications = List<Map<String, dynamic>>.from(res);
     } catch (e) {
-      debugPrint("SHORTLIST ERROR: $e");
+      debugPrint(
+        "SHORTLIST ERROR: $e",
+      );
     }
 
     if (mounted) {
@@ -48,42 +47,52 @@ class _ShortlistDashboardState
   Future<void> toggleShortlist(
     Map<String, dynamic> item,
   ) async {
-    final newValue =
-        !(item['shortlisted'] ?? false);
+    final newValue = !(item['shortlisted'] ?? false);
 
     try {
-      await supabase
-          .from('applications')
-          .update({
+      await supabase.from('applications').update({
         'shortlisted': newValue,
-      }).eq('id', item['id']);
+      }).eq(
+        'id',
+        item['id'],
+      );
 
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            newValue
-                ? "Shortlisted ✅"
-                : "Removed ❌",
+            newValue ? "Shortlisted ✅" : "Removed ❌",
           ),
         ),
       );
 
       fetchData();
     } catch (e) {
-      debugPrint("UPDATE ERROR: $e");
+      debugPrint(
+        "UPDATE ERROR: $e",
+      );
     }
   }
 
-  Color statusColor(bool shortlisted) {
-    return shortlisted
-        ? Colors.green
-        : Colors.orange;
+  Color statusColor(
+    bool shortlisted,
+  ) {
+    return shortlisted ? Colors.green : Colors.orange;
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final textColor = Theme.of(context).colorScheme.onSurface;
+
+    final secondaryTextColor = textColor.withOpacity(0.7);
+
+    final statusBg = isDark
+        ? Colors.white.withOpacity(0.08)
+        : Colors.black.withOpacity(0.05);
+
     return PremiumScreen(
       title: "Shortlist Dashboard",
       subtitle: "Manage candidate applications",
@@ -92,25 +101,24 @@ class _ShortlistDashboardState
       actions: [
         IconButton(
           onPressed: fetchData,
-          icon: const Icon(
+          icon: Icon(
             Icons.refresh,
-            color: Colors.white,
+            color: textColor,
           ),
         ),
       ],
       child: loading
           ? const Center(
-              child:
-                  CircularProgressIndicator(
+              child: CircularProgressIndicator(
                 color: AppTheme.primary,
               ),
             )
           : applications.isEmpty
-              ? const Center(
+              ? Center(
                   child: Text(
                     "No applications found",
                     style: TextStyle(
-                      color: Colors.white70,
+                      color: secondaryTextColor,
                       fontSize: 18,
                     ),
                   ),
@@ -118,85 +126,66 @@ class _ShortlistDashboardState
               : RefreshIndicator(
                   onRefresh: fetchData,
                   child: ListView.builder(
-                    itemCount:
-                        applications.length,
+                    itemCount: applications.length,
                     itemBuilder: (_, i) {
-                      final item =
-                          applications[i];
+                      final item = applications[i];
 
-                      final isShortlisted =
-                          item['shortlisted'] ??
-                              false;
+                      final isShortlisted = item['shortlisted'] ?? false;
 
                       return Padding(
-                        padding:
-                            const EdgeInsets.only(
-                                bottom: 16),
+                        padding: const EdgeInsets.only(
+                          bottom: 16,
+                        ),
                         child: PremiumCard(
                           child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment
-                                    .start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
                                 children: [
                                   Container(
-                                    padding:
-                                        const EdgeInsets
-                                            .all(14),
-                                    decoration:
-                                        BoxDecoration(
-                                      gradient:
-                                          const LinearGradient(
+                                    padding: const EdgeInsets.all(
+                                      14,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
                                         colors: [
                                           Colors.blue,
                                           Colors.purple,
                                         ],
                                       ),
-                                      borderRadius:
-                                          BorderRadius.circular(
-                                              18),
+                                      borderRadius: BorderRadius.circular(
+                                        18,
+                                      ),
                                     ),
-                                    child:
-                                        const Icon(
+                                    child: const Icon(
                                       Icons.person,
-                                      color: Colors
-                                          .white,
+                                      color: Colors.white,
                                       size: 28,
                                     ),
                                   ),
-
                                   const SizedBox(
-                                      width: 14),
-
+                                    width: 14,
+                                  ),
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment
-                                              .start,
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          item['username'] ??
-                                              "Unknown",
-                                          style:
-                                              const TextStyle(
-                                            color:
-                                                Colors.white,
-                                            fontSize:
-                                                17,
-                                            fontWeight:
-                                                FontWeight.bold,
+                                          item['username'] ?? "Unknown",
+                                          style: TextStyle(
+                                            color: textColor,
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.bold,
                                           ),
                                         ),
                                         const SizedBox(
-                                            height:
-                                                4),
+                                          height: 4,
+                                        ),
                                         Text(
                                           "Job ID: ${item['job_id'] ?? 'N/A'}",
-                                          style:
-                                              const TextStyle(
-                                            color:
-                                                Colors.white70,
+                                          style: TextStyle(
+                                            color: secondaryTextColor,
                                           ),
                                         ),
                                       ],
@@ -204,52 +193,45 @@ class _ShortlistDashboardState
                                   ),
                                 ],
                               ),
-
                               const SizedBox(
-                                  height: 18),
-
+                                height: 18,
+                              ),
                               Container(
-                                padding:
-                                    const EdgeInsets
-                                        .all(14),
-                                decoration:
-                                    BoxDecoration(
-                                  color:
-                                      Colors.white10,
-                                  borderRadius:
-                                      BorderRadius.circular(
-                                          18),
+                                padding: const EdgeInsets.all(
+                                  14,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: statusBg,
+                                  borderRadius: BorderRadius.circular(
+                                    18,
+                                  ),
                                 ),
                                 child: Row(
                                   mainAxisAlignment:
-                                      MainAxisAlignment
-                                          .spaceBetween,
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       isShortlisted
                                           ? "Shortlisted"
                                           : "Not Shortlisted",
-                                      style:
-                                          TextStyle(
+                                      style: TextStyle(
                                         color: statusColor(
-                                            isShortlisted),
-                                        fontWeight:
-                                            FontWeight
-                                                .bold,
-                                        fontSize:
-                                            16,
+                                          isShortlisted,
+                                        ),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
                                       ),
                                     ),
-
                                     Switch(
-                                      value:
-                                          isShortlisted,
-                                      activeColor:
-                                          Colors
-                                              .green,
-                                      onChanged:
-                                          (_) =>
-                                              toggleShortlist(
+                                      value: isShortlisted,
+                                      activeColor: Colors.white,
+                                      activeTrackColor: Colors.green,
+                                      inactiveThumbColor:
+                                          isDark ? Colors.white : Colors.black,
+                                      inactiveTrackColor: isDark
+                                          ? Colors.white24
+                                          : Colors.black12,
+                                      onChanged: (_) => toggleShortlist(
                                         item,
                                       ),
                                     ),

@@ -320,18 +320,6 @@ Return ONLY valid JSON:
                   child: PremiumCard(
                     child: Column(
                       children: [
-                        Container(
-                          height: 110,
-                          width: 110,
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            gradient: AppTheme.primaryGradient,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Image.asset(
-                            'assets/images/ai_robot.png',
-                          ),
-                        ),
                         const SizedBox(height: 16),
                         Text(
                           "Build AI Profile",

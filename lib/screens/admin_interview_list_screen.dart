@@ -2,18 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../theme/premium_ui.dart';
+import '../theme/theme_controller.dart'; 
 import 'video_player_screen.dart';
 
 class AdminInterviewListScreen extends StatefulWidget {
   const AdminInterviewListScreen({super.key});
 
   @override
-  State<AdminInterviewListScreen> createState() =>
-      _AdminInterviewListScreenState();
+  State<AdminInterviewListScreen> createState() => _AdminInterviewListScreenState();
 }
 
-class _AdminInterviewListScreenState
-    extends State<AdminInterviewListScreen> {
+class _AdminInterviewListScreenState extends State<AdminInterviewListScreen> {
   List<Map<String, dynamic>> interviews = [];
   List<Map<String, dynamic>> filtered = [];
 
@@ -28,10 +27,7 @@ class _AdminInterviewListScreenState
   }
 
   Future<void> fetchData() async {
-    if (mounted) {
-      setState(() => loading = true);
-    }
-
+    if (mounted) setState(() => loading = true);
     try {
       final res = await Supabase.instance.client
           .from('interview_results')
@@ -41,31 +37,18 @@ class _AdminInterviewListScreenState
       interviews = List<Map<String, dynamic>>.from(res);
       applyFilter();
     } catch (_) {}
-
-    if (mounted) {
-      setState(() => loading = false);
-    }
+    if (mounted) setState(() => loading = false);
   }
 
   void applyFilter() {
     filtered = interviews.where((r) {
-      final name =
-          (r['username'] ?? "").toString().toLowerCase();
-
+      final name = (r['username'] ?? "").toString().toLowerCase();
       final score = (r['score'] ?? 0) as int;
-
-      final searchMatch =
-          name.contains(search.toLowerCase());
+      final searchMatch = name.contains(search.toLowerCase());
 
       bool filterMatch = true;
-
-      if (filter == "Top") {
-        filterMatch = score >= 70;
-      }
-
-      if (filter == "Low") {
-        filterMatch = score < 40;
-      }
+      if (filter == "Top") filterMatch = score >= 70;
+      if (filter == "Low") filterMatch = score < 40;
 
       return searchMatch && filterMatch;
     }).toList();
@@ -76,45 +59,24 @@ class _AdminInterviewListScreenState
   bool hasVideo(dynamic url) {
     if (url == null) return false;
     final value = url.toString().trim();
-    return value.isNotEmpty &&
-        value.startsWith("http");
+    return value.isNotEmpty && value.startsWith("http");
   }
 
   Future<void> openVideo(String url) async {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => VideoPlayerScreen(
-          url: url,
-        ),
-      ),
-    );
+    Navigator.push(context, MaterialPageRoute(builder: (_) => VideoPlayerScreen(url: url)));
   }
 
   Future<void> downloadVideo(String url) async {
     try {
-      await launchUrl(
-        Uri.parse(url),
-        mode: LaunchMode.externalApplication,
-      );
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     } catch (_) {}
   }
 
   Future<void> deleteInterview(Map item) async {
-    await Supabase.instance.client
-        .from('interview_results')
-        .delete()
-        .eq('id', item['id']);
-
+    await Supabase.instance.client.from('interview_results').delete().eq('id', item['id']);
     fetchData();
-
     if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Deleted successfully"),
-      ),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Deleted successfully")));
   }
 
   Color scoreColor(int score) {
@@ -125,6 +87,9 @@ class _AdminInterviewListScreenState
 
   @override
   Widget build(BuildContext context) {
+    final textColor = Theme.of(context).colorScheme.onBackground;
+    final secondaryColor = Theme.of(context).textTheme.bodyMedium?.color;
+
     return PremiumScreen(
       title: "Interview Results",
       subtitle: "Admin interview review panel",
@@ -133,10 +98,7 @@ class _AdminInterviewListScreenState
       actions: [
         IconButton(
           onPressed: fetchData,
-          icon: const Icon(
-            Icons.refresh,
-            color: Colors.white,
-          ),
+          icon: Icon(Icons.refresh, color: textColor),
         ),
       ],
       child: Column(
@@ -148,54 +110,32 @@ class _AdminInterviewListScreenState
                 search = v;
                 applyFilter();
               },
-              style: const TextStyle(
-                color: Colors.white,
-              ),
-              decoration: const InputDecoration(
+              style: TextStyle(color: textColor),
+              decoration: InputDecoration(
                 hintText: "Search username...",
-                hintStyle: TextStyle(
-                  color: Colors.white54,
-                ),
-                prefixIcon: Icon(
-                  Icons.search,
-                  color: Colors.white70,
-                ),
+                hintStyle: TextStyle(color: secondaryColor),
+                prefixIcon: Icon(Icons.search, color: secondaryColor),
                 border: InputBorder.none,
               ),
             ),
           ),
-
           const SizedBox(height: 16),
-
           Row(
-            mainAxisAlignment:
-                MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              filterChip("All"),
-              filterChip("Top"),
-              filterChip("Low"),
+              filterChip("All", textColor),
+              filterChip("Top", textColor),
+              filterChip("Low", textColor),
             ],
           ),
-
           const SizedBox(height: 16),
-
           Expanded(
             child: loading
-                ? const Center(
-                    child:
-                        CircularProgressIndicator(
-                      color: AppTheme.primary,
-                    ),
-                  )
+                ? const Center(child: CircularProgressIndicator(color: AppTheme.primary))
                 : filtered.isEmpty
-                    ? const Center(
-                        child: Text(
-                          "No interview data",
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 18,
-                          ),
-                        ),
+                    ? Center(
+                        child: Text("No interview data",
+                            style: TextStyle(color: secondaryColor, fontSize: 18)),
                       )
                     : RefreshIndicator(
                         onRefresh: fetchData,
@@ -203,183 +143,88 @@ class _AdminInterviewListScreenState
                           itemCount: filtered.length,
                           itemBuilder: (_, i) {
                             final r = filtered[i];
-                            final score =
-                                (r['score'] ?? 0)
-                                    as int;
-                            final videoUrl =
-                                r['video_url'];
+                            final score = (r['score'] ?? 0) as int;
+                            final videoUrl = r['video_url'];
 
                             return Padding(
-                              padding:
-                                  const EdgeInsets.only(
-                                      bottom: 16),
+                              padding: const EdgeInsets.only(bottom: 16),
                               child: PremiumCard(
                                 child: Column(
                                   children: [
                                     Row(
                                       children: [
                                         CircleAvatar(
-                                          backgroundColor:
-                                              scoreColor(
-                                                  score),
-                                          child: Text(
-                                            score
-                                                .toString(),
-                                            style:
-                                                const TextStyle(
-                                              color: Colors
-                                                  .white,
-                                            ),
-                                          ),
+                                          backgroundColor: scoreColor(score),
+                                          child: Text(score.toString(),
+                                              style: const TextStyle(color: Colors.white)),
                                         ),
-
-                                        const SizedBox(
-                                            width:
-                                                14),
-
+                                        const SizedBox(width: 14),
                                         Expanded(
-                                          child:
-                                              Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment
-                                                    .start,
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                r['username'] ??
-                                                    "Unknown",
-                                                style:
-                                                    const TextStyle(
-                                                  color:
-                                                      Colors.white,
-                                                  fontWeight:
-                                                      FontWeight.bold,
-                                                  fontSize:
-                                                      17,
-                                                ),
-                                              ),
-                                              const SizedBox(
-                                                  height:
-                                                      4),
-                                              Text(
-                                                "Score: $score%",
-                                                style:
-                                                    const TextStyle(
-                                                  color:
-                                                      Colors.white70,
-                                                ),
-                                              ),
+                                              Text(r['username'] ?? "Unknown",
+                                                  style: TextStyle(
+                                                      color: textColor,
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 17)),
+                                              const SizedBox(height: 4),
+                                              Text("Score: $score%",
+                                                  style: TextStyle(color: secondaryColor)),
                                             ],
                                           ),
                                         ),
                                       ],
                                     ),
-
-                                    const SizedBox(
-                                        height:
-                                            16),
-
-                                    if (hasVideo(
-                                        videoUrl))
+                                    const SizedBox(height: 16),
+                                    if (hasVideo(videoUrl))
                                       Row(
                                         children: [
                                           Expanded(
-                                            child:
-                                                PremiumButton(
-                                              text:
-                                                  "Watch",
-                                              icon: Icons
-                                                  .play_arrow,
-                                              onTap:
-                                                  () =>
-                                                      openVideo(
-                                                videoUrl
-                                                    .toString(),
-                                              ),
+                                            child: PremiumButton(
+                                              text: "Watch",
+                                              icon: Icons.play_arrow,
+                                              onTap: () => openVideo(videoUrl.toString()),
                                             ),
                                           ),
-
-                                          const SizedBox(
-                                              width:
-                                                  10),
-
+                                          const SizedBox(width: 10),
                                           Expanded(
-                                            child:
-                                                PremiumButton(
-                                              text:
-                                                  "Open",
-                                              icon: Icons
-                                                  .download,
-                                              onTap:
-                                                  () =>
-                                                      downloadVideo(
-                                                videoUrl
-                                                    .toString(),
-                                              ),
+                                            child: PremiumButton(
+                                              text: "Open",
+                                              icon: Icons.download,
+                                              onTap: () => downloadVideo(videoUrl.toString()),
                                             ),
                                           ),
-
                                           IconButton(
-                                            onPressed:
-                                                () {
+                                            onPressed: () {
                                               showDialog(
-                                                context:
-                                                    context,
-                                                builder:
-                                                    (_) =>
-                                                        AlertDialog(
-                                                  title:
-                                                      const Text(
-                                                    "Delete?",
-                                                  ),
-                                                  content:
-                                                      const Text(
-                                                    "Remove interview record?",
-                                                  ),
+                                                context: context,
+                                                builder: (_) => AlertDialog(
+                                                  title: const Text("Delete?"),
+                                                  content: const Text("Remove interview record?"),
                                                   actions: [
                                                     TextButton(
-                                                      onPressed:
-                                                          () => Navigator.pop(
-                                                              context),
-                                                      child:
-                                                          const Text(
-                                                        "Cancel",
-                                                      ),
+                                                      onPressed: () => Navigator.pop(context),
+                                                      child: const Text("Cancel"),
                                                     ),
                                                     TextButton(
-                                                      onPressed:
-                                                          () {
-                                                        Navigator.pop(
-                                                            context);
-                                                        deleteInterview(
-                                                            r);
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                        deleteInterview(r);
                                                       },
-                                                      child:
-                                                          const Text(
-                                                        "Delete",
-                                                      ),
+                                                      child: const Text("Delete"),
                                                     ),
                                                   ],
                                                 ),
                                               );
                                             },
-                                            icon:
-                                                const Icon(
-                                              Icons.delete,
-                                              color:
-                                                  Colors.red,
-                                            ),
+                                            icon: const Icon(Icons.delete, color: Colors.red),
                                           ),
                                         ],
                                       )
                                     else
-                                      const Text(
-                                        "No video available",
-                                        style:
-                                            TextStyle(
-                                          color:
-                                              Colors.white54,
-                                        ),
-                                      ),
+                                      Text("No video available",
+                                          style: TextStyle(color: secondaryColor)),
                                   ],
                                 ),
                               ),
@@ -393,15 +238,13 @@ class _AdminInterviewListScreenState
     );
   }
 
-  Widget filterChip(String text) {
+  Widget filterChip(String text, Color textColor) {
     return ChoiceChip(
       label: Text(text),
       selected: filter == text,
       selectedColor: AppTheme.primary,
-      backgroundColor: Colors.white10,
-      labelStyle: const TextStyle(
-        color: Colors.white,
-      ),
+      backgroundColor: Theme.of(context).cardColor,
+      labelStyle: TextStyle(color: textColor),
       onSelected: (_) {
         filter = text;
         applyFilter();

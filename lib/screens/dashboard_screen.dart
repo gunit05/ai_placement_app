@@ -297,7 +297,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         "page": const ChatbotScreen(),
       },
       {
-        "title": "Interview",
+        "title": "AI Interview",
         "icon": Icons.mic,
         "page": InterviewScreen(username: widget.username),
       },
@@ -307,7 +307,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         "page": CodingInterviewScreen(username: widget.username),
       },
       {
-        "title": "Career AI",
+        "title": "AI Career Guidance",
         "icon": Icons.psychology,
         "page": AICareerGuidanceScreen(username: widget.username),
       },

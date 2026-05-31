@@ -16,6 +16,7 @@ import 'coding_interview_screen.dart';
 import 'ai_career_guidance_screen.dart';
 import 'profile_screen.dart';
 import 'home_page.dart';
+import 'youtube_ai_videos_screen.dart';
 
 import '../theme/premium_ui.dart';
 
@@ -263,51 +264,67 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final items = [
       {
         "title": "Upload Resume",
+        "subtitle": "Get AI feedback on your resume",
         "icon": Icons.upload_file,
         "page": ResumeUploadScreen(username: widget.username),
       },
       {
         "title": "AI ATS Score",
+        "subtitle": "Get AI-powered insights on your resume",
         "icon": Icons.verified,
         "page": ResumeScoreScreen(username: widget.username),
       },
       {
         "title": "Jobs",
+        "subtitle": "Find your next opportunity",
         "icon": Icons.work,
         "page": JobsScreen(username: widget.username),
       },
       {
         "title": "History",
+        "subtitle": "View your application history",
         "icon": Icons.history,
         "page": ApplicationHistoryScreen(username: widget.username),
       },
       {
         "title": "AI Aptitude",
+        "subtitle": "Test your cognitive abilities",
         "icon": Icons.school,
         "page": AptitudeScreen(username: widget.username),
       },
       {
         "title": "AI Quiz",
+        "subtitle": "Test your knowledge",
         "icon": Icons.quiz,
         "page": QuizScreen(username: widget.username),
       },
       {
         "title": "AI Chatbot",
+        "subtitle": "Get instant help with your questions",
         "icon": Icons.smart_toy,
         "page": const ChatbotScreen(),
       },
       {
+        "title": "AI Videos",
+        "subtitle": "Curated YouTube content based on your skills",
+        "icon": Icons.video_library,
+        "page": YoutubeAiVideosScreen(username: widget.username),
+      },
+      {
         "title": "AI Interview",
+        "subtitle": "Mock interview with AI feedback",
         "icon": Icons.mic,
         "page": InterviewScreen(username: widget.username),
       },
       {
         "title": "Coding Practice",
+        "subtitle": "Improve your coding skills",
         "icon": Icons.code,
         "page": CodingInterviewScreen(username: widget.username),
       },
       {
-        "title": "AI Career Guidance",
+        "title": "AI Career  Guidance",
+        "subtitle": "Get personalized career advice",
         "icon": Icons.psychology,
         "page": AICareerGuidanceScreen(username: widget.username),
       },
@@ -352,7 +369,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   const SizedBox(height: 16),
                   Text(
                     item['title'] as String,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
+                  if (item['subtitle'] != null)
+                    Text(
+                      item['subtitle'] as String,
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: Colors.white54,
+                      ),
+                    ),
                 ],
               ),
             ),

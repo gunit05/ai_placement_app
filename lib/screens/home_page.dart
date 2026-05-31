@@ -1,30 +1,31 @@
 import 'package:flutter/material.dart';
-
 import 'notifications_screen.dart';
 import 'resume_upload_screen.dart';
 import 'chatbot_screen.dart';
 import 'interview_screen.dart';
-import 'jobs_screen.dart';
+import 'ai_skill_onboarding_screen.dart';
 import 'quiz_screen.dart';
 import 'aptitude_screen.dart';
-
 import '../theme/premium_ui.dart';
 
 class HomePage extends StatelessWidget {
   final String username;
   final List<String> skills;
+  final String recommendedRole;
+  final String salaryRange;
+  final List<String> aiSuggestions;
 
   const HomePage({
     super.key,
     required this.username,
     this.skills = const [],
+    this.recommendedRole = "",
+    this.salaryRange = "",
+    this.aiSuggestions = const [],
   });
 
   void go(BuildContext context, Widget page) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => page),
-    );
+    Navigator.push(context, MaterialPageRoute(builder: (_) => page));
   }
 
   @override
@@ -36,22 +37,8 @@ class HomePage extends StatelessWidget {
       backgroundColor: isDark ? AppTheme.darkBg : AppTheme.lightBg,
       body: Stack(
         children: [
-          Positioned(
-            top: -120,
-            left: -80,
-            child: _glow(
-              260,
-              AppTheme.primary.withOpacity(0.22),
-            ),
-          ),
-          Positioned(
-            bottom: -140,
-            right: -100,
-            child: _glow(
-              300,
-              Colors.blue.withOpacity(0.10),
-            ),
-          ),
+          Positioned(top: -120, left: -80, child: _glow(260, AppTheme.primary.withOpacity(0.22))),
+          Positioned(bottom: -140, right: -100, child: _glow(300, Colors.blue.withOpacity(0.10))),
           SafeArea(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
@@ -85,20 +72,29 @@ class HomePage extends StatelessWidget {
                           ],
                         ),
                       ),
+                      /// EDIT AI PROFILE ICON
                       GestureDetector(
-                        onTap: () {
-                          go(context, NotificationsScreen(username: username));
-                        },
+                        onTap: () => go(context, AiSkillOnboardingScreen(username: username)),
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: isDark ? Colors.white12 : Colors.black12,
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(
-                            Icons.notifications_rounded,
-                            color: isDark ? Colors.white70 : Colors.black54,
+                          child: Icon(Icons.edit, color: isDark ? Colors.white70 : Colors.black54),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      /// NOTIFICATIONS ICON
+                      GestureDetector(
+                        onTap: () => go(context, NotificationsScreen(username: username)),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.white12 : Colors.black12,
+                            shape: BoxShape.circle,
                           ),
+                          child: Icon(Icons.notifications_rounded, color: isDark ? Colors.white70 : Colors.black54),
                         ),
                       ),
                     ],
@@ -106,7 +102,7 @@ class HomePage extends StatelessWidget {
 
                   const SizedBox(height: 28),
 
-                  /// HERO AI CARD
+                  /// HERO CARD
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(24),
@@ -121,56 +117,38 @@ class HomePage extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                "AI Placement\nAssistant",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  height: 1.2,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                skills.isEmpty
-                                    ? "Smart interview prep, resume analysis & career growth."
-                                    : "Top skills: ${skills.take(3).join(", ")}",
-                                style: const TextStyle(
-                                  color: Colors.white70,
-                                  height: 1.5,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              GestureDetector(
-                                onTap: () {
-                                  go(
-                                    context,
-                                    InterviewScreen(
-                                      username: username,
-                                    ),
-                                  );
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 18,
-                                    vertical: 12,
-                                  ),
-                                  
-                                ),
-                              ),
-                            ],
+                        const Text(
+                          "Step into the Future of Job Hunting with AI-Powered Tools",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            height: 1.2,
                           ),
                         ),
+                        const SizedBox(height: 12),
+                        Text(
+                          skills.isEmpty
+                              ? "Smart interview prep, resume analysis & career growth."
+                              : "Top skills: ${skills.take(3).join(", ")}",
+                          style: const TextStyle(color: Colors.white70, height: 1.5),
+                        ),
                         const SizedBox(height: 20),
+                        PremiumButton(
+                          text: "Start Interview Prep",
+                          icon: Icons.arrow_forward,
+                          onTap: () => go(context, InterviewScreen(username: username)),
+                        ),
                       ],
                     ),
                   ),
+
+                  const SizedBox(height: 30),
+
+                  /// QUICK ACTIONS
                   Text(
                     "Quick Actions",
                     style: TextStyle(
@@ -179,9 +157,7 @@ class HomePage extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-
                   const SizedBox(height: 18),
-
                   GridView.count(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -190,44 +166,87 @@ class HomePage extends StatelessWidget {
                     mainAxisSpacing: 16,
                     childAspectRatio: 0.95,
                     children: [
-                      _quickCard(
-                        context,
-                        isDark,
-                        Icons.upload_file,
-                        "Upload Resume",
-                        ResumeUploadScreen(
-                          username: username,
-                        ),
-                      ),
-                      _quickCard(
-                        context,
-                        isDark,
-                        Icons.smart_toy,
-                        "AI Chatbot",
-                        const ChatbotScreen(),
-                      ),
-                      _quickCard(
-                        context,
-                        isDark,
-                        Icons.quiz,
-                        "AI Quiz",
-                        QuizScreen(
-                          username: username,
-                        ),
-                      ),
-                      _quickCard(
-                        context,
-                        isDark,
-                        Icons.school,
-                        "AI Aptitude",
-                        AptitudeScreen(
-                          username: username,
-                        ),
-                      ),
+                      _quickCard(context, isDark, Icons.upload_file, "Upload Resume",
+                          ResumeUploadScreen(username: username)),
+                      _quickCard(context, isDark, Icons.smart_toy, "AI Chatbot", const ChatbotScreen()),
+                      _quickCard(context, isDark, Icons.quiz, "AI Quiz", QuizScreen(username: username)),
+                      _quickCard(context, isDark, Icons.school, "AI Aptitude", AptitudeScreen(username: username)),
                     ],
                   ),
 
                   const SizedBox(height: 30),
+
+                  /// CAREER INSIGHTS SECTION
+                  if (recommendedRole.isNotEmpty)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Career Insights",
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        PremiumCard(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Recommended Role",
+                                style: TextStyle(
+                                  color: isDark ? Colors.white70 : Colors.black54,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                recommendedRole,
+                                style: TextStyle(
+                                  color: AppTheme.primary,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                "Expected Salary: $salaryRange",
+                                style: TextStyle(
+                                  color: isDark ? Colors.amber : Colors.deepOrange,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              ...aiSuggestions.map(
+                                (s) => Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 4),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.check_circle, color: Colors.greenAccent, size: 18),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          s,
+                                          style: TextStyle(
+                                            color: isDark ? Colors.white70 : Colors.black87,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                  const SizedBox(height: 40),
                 ],
               ),
             ),
@@ -237,44 +256,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _statCard(
-    bool isDark,
-    String value,
-    String label,
-    IconData icon,
-  ) {
-    return PremiumCard(
-      child: Column(
-        children: [
-          Icon(icon, color: AppTheme.primary),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: TextStyle(
-              color: isDark ? Colors.white : Colors.black87,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: TextStyle(
-              color: isDark ? Colors.white70 : Colors.black54,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _quickCard(
-    BuildContext context,
-    bool isDark,
-    IconData icon,
-    String title,
-    Widget page,
-  ) {
+  Widget _quickCard(BuildContext context, bool isDark, IconData icon, String title, Widget page) {
     return GestureDetector(
       onTap: () => go(context, page),
       child: PremiumCard(
@@ -287,11 +269,7 @@ class HomePage extends StatelessWidget {
                 gradient: AppTheme.aiGradient,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Icon(
-                icon,
-                color: Colors.white,
-                size: 28,
-              ),
+              child: Icon(icon, color: Colors.white, size: 28),
             ),
             const SizedBox(height: 16),
             Text(
@@ -311,10 +289,7 @@ class HomePage extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
-      ),
+      decoration: BoxDecoration(shape: BoxShape.circle, color: color),
     );
   }
 }

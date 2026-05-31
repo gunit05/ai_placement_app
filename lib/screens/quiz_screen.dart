@@ -3,16 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 import '../theme/premium_ui.dart';
 
 class QuizScreen extends StatefulWidget {
   final String username;
 
-  const QuizScreen({
-    super.key,
-    required this.username,
-  });
+  const QuizScreen({super.key, required this.username});
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -20,10 +16,8 @@ class QuizScreen extends StatefulWidget {
 
 class _QuizScreenState extends State<QuizScreen> {
   final String apiKey = dotenv.env['GROQ_API_KEY_BACKUP'] ?? '';
-
   List<Map<String, dynamic>> questions = [];
   List<String> userSkills = [];
-
   int index = 0;
   int score = 0;
   bool finished = false;
@@ -52,19 +46,11 @@ class _QuizScreenState extends State<QuizScreen> {
           .maybeSingle();
 
       if (res != null && res['skills'] != null) {
-        userSkills = List<String>.from(
-          res['skills'],
-        );
+        userSkills = List<String>.from(res['skills']);
       }
 
       if (userSkills.isEmpty) {
-        userSkills = [
-          "Java",
-          "Python",
-          "DSA",
-          "Operating System",
-          "Database",
-        ];
+        userSkills = ["Java", "Python", "DSA", "Operating System", "Database"];
       }
 
       final prompt = """
@@ -89,9 +75,7 @@ Format:
 """;
 
       final response = await http.post(
-        Uri.parse(
-          'https://api.groq.com/openai/v1/chat/completions',
-        ),
+        Uri.parse('https://api.groq.com/openai/v1/chat/completions'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $apiKey',
@@ -100,10 +84,7 @@ Format:
           "model": "llama-3.3-70b-versatile",
           "messages": [
             {"role": "system", "content": "You return only valid JSON."},
-            {
-              "role": "user",
-              "content": prompt,
-            }
+            {"role": "user", "content": prompt}
           ],
           "temperature": 0.7,
         }),
@@ -111,24 +92,10 @@ Format:
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-
         String aiText = data['choices'][0]['message']['content'];
-
-        aiText = aiText.replaceAll(
-          "```json",
-          "",
-        );
-        aiText = aiText.replaceAll(
-          "```",
-          "",
-        );
-        aiText = aiText.trim();
-
+        aiText = aiText.replaceAll("```json", "").replaceAll("```", "").trim();
         final parsed = jsonDecode(aiText);
-
-        questions = List<Map<String, dynamic>>.from(
-          parsed,
-        );
+        questions = List<Map<String, dynamic>>.from(parsed);
       } else {
         throw Exception();
       }
@@ -147,16 +114,11 @@ Format:
       ];
     }
 
-    if (mounted) {
-      setState(() => loading = false);
-    }
+    if (mounted) setState(() => loading = false);
   }
 
   void checkAnswer(String selected) {
-    if (selected == questions[index]['answer']) {
-      score++;
-    }
-
+    if (selected == questions[index]['answer']) score++;
     if (index < questions.length - 1) {
       setState(() => index++);
     } else {
@@ -164,9 +126,7 @@ Format:
     }
   }
 
-  void restartQuiz() {
-    loadQuiz();
-  }
+  void restartQuiz() => loadQuiz();
 
   Widget quizView() {
     final q = questions[index];
@@ -185,22 +145,36 @@ Format:
             ),
           ),
           const SizedBox(height: 22),
-          ...(q['options'] as List)
-              .map(
-                (option) => Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: 14,
+
+          /// FIXED OPTIONS LAYOUT
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: (q['options'] as List).map((option) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: AppTheme.aiGradient,
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  child: PremiumButton(
-                    text: option.toString(),
-                    icon: Icons.arrow_forward,
-                    onTap: () => checkAnswer(
-                      option.toString(),
+                  child: TextButton(
+                    child: Text(
+                     option.toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      softWrap: true,
+                      overflow: TextOverflow.visible,
                     ),
+                    onPressed: () => checkAnswer(option.toString()),
                   ),
                 ),
-              )
-              .toList(),
+              );
+            }).toList(),
+          ),
         ],
       ),
     );
@@ -208,15 +182,10 @@ Format:
 
   Widget resultView() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return PremiumCard(
       child: Column(
         children: [
-          const Icon(
-            Icons.emoji_events,
-            color: Colors.amber,
-            size: 80,
-          ),
+          const Icon(Icons.emoji_events, color: Colors.amber, size: 80),
           const SizedBox(height: 18),
           Text(
             "Score: $score / ${questions.length}",
@@ -229,9 +198,7 @@ Format:
           const SizedBox(height: 10),
           Text(
             "Keep practicing to improve 🚀",
-            style: TextStyle(
-              color: isDark ? Colors.white70 : Colors.black54,
-            ),
+            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
           ),
           const SizedBox(height: 24),
           PremiumButton(
@@ -252,22 +219,8 @@ Format:
       backgroundColor: isDark ? AppTheme.darkBg : AppTheme.lightBg,
       body: Stack(
         children: [
-          Positioned(
-            top: -120,
-            left: -80,
-            child: _glow(
-              260,
-              AppTheme.primary.withOpacity(0.22),
-            ),
-          ),
-          Positioned(
-            bottom: -140,
-            right: -100,
-            child: _glow(
-              300,
-              Colors.blue.withOpacity(0.10),
-            ),
-          ),
+          Positioned(top: -120, left: -80, child: _glow(260, AppTheme.primary.withOpacity(0.22))),
+          Positioned(bottom: -140, right: -100, child: _glow(300, Colors.blue.withOpacity(0.10))),
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20),
@@ -283,10 +236,8 @@ Format:
                             color: isDark ? Colors.white10 : Colors.white,
                             borderRadius: BorderRadius.circular(18),
                           ),
-                          child: Icon(
-                            Icons.arrow_back_ios_new,
-                            color: isDark ? Colors.white : Colors.black87,
-                          ),
+                          child: Icon(Icons.arrow_back_ios_new,
+                              color: isDark ? Colors.white : Colors.black87),
                         ),
                       ),
                       const Spacer(),
@@ -311,11 +262,7 @@ Format:
                     ),
                     child: Column(
                       children: [
-                        const Icon(
-                          Icons.code,
-                          color: Colors.white,
-                          size: 70,
-                        ),
+                        const Icon(Icons.code, color: Colors.white, size: 70),
                         const SizedBox(height: 16),
                         Text(
                           finished ? "Quiz Completed 🎉" : "AI Technical Quiz",
@@ -331,9 +278,7 @@ Format:
                               ? "${widget.username}, score: $score/${questions.length}"
                               : "Based on your selected skills",
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                          ),
+                          style: const TextStyle(color: Colors.white70),
                         ),
                       ],
                     ),
@@ -342,9 +287,7 @@ Format:
                   if (loading)
                     const Padding(
                       padding: EdgeInsets.all(40),
-                      child: CircularProgressIndicator(
-                        color: AppTheme.primary,
-                      ),
+                      child: CircularProgressIndicator(color: AppTheme.primary),
                     )
                   else if (!finished)
                     quizView()
@@ -359,17 +302,11 @@ Format:
     );
   }
 
-  Widget _glow(
-    double size,
-    Color color,
-  ) {
+  Widget _glow(double size, Color color) {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
-      ),
+      decoration: BoxDecoration(shape: BoxShape.circle, color: color),
     );
   }
 }

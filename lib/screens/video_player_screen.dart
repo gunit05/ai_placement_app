@@ -66,7 +66,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Interview Video")),
+      appBar: AppBar(title: const Text("Video Player")),
 
       body: Center(
         child: loading

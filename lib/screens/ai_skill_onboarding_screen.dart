@@ -25,39 +25,14 @@ class _AiSkillOnboardingScreenState extends State<AiSkillOnboardingScreen> {
   final String apiKey = dotenv.env['GROQ_API_KEY'] ?? '';
 
   final List<String> skills = [
-    "C",
-    "C++",
-    "Java",
-    "Python",
-    "Dart",
-    "Flutter",
-    "Android",
-    "Kotlin",
-    "HTML",
-    "CSS",
-    "JavaScript",
-    "React",
-    "Node.js",
-    "Web Development",
-    "DSA",
-    "SQL",
-    "Database",
-    "Operating System",
-    "Computer Networks",
-    "Machine Learning",
-    "Deep Learning",
-    "Data Science",
-    "AI",
-    "TensorFlow",
-    "Cloud",
-    "AWS",
-    "Docker",
-    "Kubernetes",
-    "DevOps",
+    "C","C++","Java","Python","Dart","Flutter","Android","Kotlin",
+    "HTML","CSS","JavaScript","React","Node.js","Web Development","DSA",
+    "SQL","Database","Operating System","Computer Networks","Machine Learning",
+    "Deep Learning","Data Science","AI","TensorFlow","Cloud","AWS","Docker",
+    "Kubernetes","DevOps",
   ];
 
   final List<String> selectedSkills = [];
-
   bool loading = false;
   String previewRole = "";
   String salaryRange = "";
@@ -71,7 +46,6 @@ class _AiSkillOnboardingScreenState extends State<AiSkillOnboardingScreen> {
 
   void showMsg(String msg) {
     if (!mounted) return;
-
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),
@@ -90,20 +64,13 @@ class _AiSkillOnboardingScreenState extends State<AiSkillOnboardingScreen> {
           .maybeSingle();
 
       if (data != null) {
-        selectedSkills.clear();
-        selectedSkills.addAll(
-          List<String>.from(data['skills'] ?? []),
-        );
-
+        selectedSkills
+          ..clear()
+          ..addAll(List<String>.from(data['skills'] ?? []));
         previewRole = data['recommended_role'] ?? "";
-
         salaryRange = data['salary_range'] ?? "";
-
-        aiSuggestions = List<String>.from(
-          data['ai_suggestions'] ?? [],
-        );
+        aiSuggestions = List<String>.from(data['ai_suggestions'] ?? []);
       }
-
       if (mounted) setState(() {});
     } catch (_) {}
   }
@@ -117,7 +84,6 @@ class _AiSkillOnboardingScreenState extends State<AiSkillOnboardingScreen> {
       });
       return;
     }
-
     setState(() => loading = true);
 
     try {
@@ -138,9 +104,7 @@ Return ONLY valid JSON:
 """;
 
       final response = await http.post(
-        Uri.parse(
-          'https://api.groq.com/openai/v1/chat/completions',
-        ),
+        Uri.parse('https://api.groq.com/openai/v1/chat/completions'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $apiKey',
@@ -157,13 +121,8 @@ Return ONLY valid JSON:
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-
         String aiText = data['choices'][0]['message']['content'];
-
-        aiText = aiText.replaceAll("```json", "");
-        aiText = aiText.replaceAll("```", "");
-        aiText = aiText.trim();
-
+        aiText = aiText.replaceAll("```json", "").replaceAll("```", "").trim();
         final parsed = jsonDecode(aiText);
 
         previewRole = parsed['role'];
@@ -173,16 +132,10 @@ Return ONLY valid JSON:
     } catch (_) {
       previewRole = "Software Engineer";
       salaryRange = "₹5 LPA - ₹12 LPA";
-      aiSuggestions = [
-        "Build projects",
-        "Practice DSA",
-        "Improve communication"
-      ];
+      aiSuggestions = ["Build projects","Practice DSA","Improve communication"];
     }
 
-    if (mounted) {
-      setState(() => loading = false);
-    }
+    if (mounted) setState(() => loading = false);
   }
 
   Future<void> saveSkills() async {
@@ -190,7 +143,6 @@ Return ONLY valid JSON:
       showMsg("Select at least one skill");
       return;
     }
-
     setState(() => loading = true);
 
     try {
@@ -206,13 +158,10 @@ Return ONLY valid JSON:
       await prefs.setBool('seen_onboarding', true);
 
       if (!mounted) return;
-
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (_) => DashboardScreen(
-            username: widget.username,
-          ),
+          builder: (_) => DashboardScreen(username: widget.username),
         ),
         (route) => false,
       );
@@ -220,14 +169,11 @@ Return ONLY valid JSON:
       showMsg("Failed to save profile");
     }
 
-    if (mounted) {
-      setState(() => loading = false);
-    }
+    if (mounted) setState(() => loading = false);
   }
 
   Widget skillChip(String skill) {
     final selected = selectedSkills.contains(skill);
-
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
@@ -235,28 +181,20 @@ Return ONLY valid JSON:
         setState(() {
           selected ? selectedSkills.remove(skill) : selectedSkills.add(skill);
         });
-
         await generateAIRecommendation();
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           gradient: selected ? AppTheme.primaryGradient : null,
-          color: selected
-              ? null
-              : (isDark ? Colors.white10 : Colors.grey.shade200),
+          color: selected ? null : (isDark ? Colors.white10 : Colors.grey.shade200),
           borderRadius: BorderRadius.circular(30),
         ),
         child: Text(
           skill,
           style: TextStyle(
-            color: selected
-                ? Colors.white
-                : (isDark ? Colors.white70 : Colors.black54),
+            color: selected ? Colors.white : (isDark ? Colors.white70 : Colors.black54),
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -266,21 +204,15 @@ Return ONLY valid JSON:
 
   Widget suggestionCard(String text) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return PremiumCard(
       child: Row(
         children: [
-          const Icon(
-            Icons.auto_awesome,
-            color: Colors.amber,
-          ),
+          const Icon(Icons.auto_awesome, color: Colors.amber),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               text,
-              style: TextStyle(
-                color: isDark ? Colors.white : Colors.black87,
-              ),
+              style: TextStyle(color: isDark ? Colors.white : Colors.black87),
             ),
           ),
         ],
@@ -299,18 +231,12 @@ Return ONLY valid JSON:
           Positioned(
             top: -120,
             left: -80,
-            child: _glow(
-              260,
-              AppTheme.primary.withOpacity(0.22),
-            ),
+            child: _glow(260, AppTheme.primary.withOpacity(0.22)),
           ),
           Positioned(
             bottom: -140,
             right: -100,
-            child: _glow(
-              300,
-              Colors.blue.withOpacity(0.10),
-            ),
+            child: _glow(300, Colors.blue.withOpacity(0.10)),
           ),
           SafeArea(
             child: Column(
@@ -343,9 +269,7 @@ Return ONLY valid JSON:
                 ),
                 if (previewRole.isNotEmpty)
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(20),
@@ -379,9 +303,7 @@ Return ONLY valid JSON:
                 const SizedBox(height: 18),
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Column(
                       children: [
                         Wrap(
@@ -389,10 +311,8 @@ Return ONLY valid JSON:
                           runSpacing: 12,
                           children: skills.map(skillChip).toList(),
                         ),
-                        const SizedBox(height: 20),
-                        ...aiSuggestions.map(
-                          suggestionCard,
-                        ),
+                                              const SizedBox(height: 20),
+                        ...aiSuggestions.map(suggestionCard),
                       ],
                     ),
                   ),
@@ -416,10 +336,7 @@ Return ONLY valid JSON:
     );
   }
 
-  Widget _glow(
-    double size,
-    Color color,
-  ) {
+  Widget _glow(double size, Color color) {
     return Container(
       width: size,
       height: size,

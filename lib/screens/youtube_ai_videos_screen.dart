@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../theme/premium_ui.dart';
+import '../theme/theme_controller.dart';
 
 class YoutubeAiVideosScreen extends StatefulWidget {
   final String username;
@@ -20,14 +22,12 @@ class YoutubeAiVideosScreen extends StatefulWidget {
 }
 
 class _YoutubeAiVideosScreenState extends State<YoutubeAiVideosScreen> {
-  final String apiKey = dotenv.env['GROQ_API_KEY 2'] ?? '';
-
+  final String apiKey = dotenv.env['GROQ_API_KEY_BACKUP'] ?? '';
   final supabase = Supabase.instance.client;
   final searchController = TextEditingController();
 
   List<Map<String, dynamic>> allVideos = [];
   List<Map<String, dynamic>> filteredVideos = [];
-
   bool loading = true;
 
   @override
@@ -39,47 +39,28 @@ class _YoutubeAiVideosScreenState extends State<YoutubeAiVideosScreen> {
   Future<void> loadVideos() async {
     try {
       List<String> skills = widget.skills;
-
       if (skills.isEmpty) {
         final res = await supabase
             .from('user_skills')
             .select()
             .eq('username', widget.username)
             .maybeSingle();
-
         if (res != null && res['skills'] != null) {
           skills = List<String>.from(res['skills']);
         }
       }
-
       if (skills.isEmpty) {
         skills = ["Flutter", "DSA", "Aptitude", "HR Interview"];
       }
 
       final prompt = """
-Generate 12 best YouTube learning video recommendations for:
+Generate 10 YouTube learning video recommendations for:
 ${skills.join(", ")}
-
-Mix:
-- technical interview prep
-- aptitude
-- HR interview
-- project tutorials
-
-Return ONLY JSON:
-[
- {
-   "title":"Flutter Interview Questions",
-   "channel":"AI Recommended",
-   "query":"flutter interview questions"
- }
-]
+Return ONLY valid JSON.
 """;
 
       final response = await http.post(
-        Uri.parse(
-          'https://api.groq.com/openai/v1/chat/completions',
-        ),
+        Uri.parse('https://api.groq.com/openai/v1/chat/completions'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $apiKey',
@@ -87,10 +68,7 @@ Return ONLY JSON:
         body: jsonEncode({
           "model": "llama-3.3-70b-versatile",
           "messages": [
-            {
-              "role": "system",
-              "content": "Return only valid JSON video recommendations."
-            },
+            {"role": "system", "content": "Return only valid JSON."},
             {"role": "user", "content": prompt}
           ],
           "temperature": 0.7
@@ -99,15 +77,9 @@ Return ONLY JSON:
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-
         String aiText = data['choices'][0]['message']['content'];
-
-        aiText = aiText.replaceAll("```json", "");
-        aiText = aiText.replaceAll("```", "");
-        aiText = aiText.trim();
-
+        aiText = aiText.replaceAll("```json", "").replaceAll("```", "").trim();
         final parsed = jsonDecode(aiText);
-
         allVideos = List<Map<String, dynamic>>.from(parsed);
       } else {
         throw Exception();
@@ -124,27 +96,14 @@ Return ONLY JSON:
           "channel": "Fallback",
           "query": "dsa interview preparation"
         },
-        {
-          "title": "Placement Aptitude",
-          "channel": "Fallback",
-          "query": "placement aptitude"
-        },
-        {
-          "title": "HR Interview Questions",
-          "channel": "Fallback",
-          "query": "hr interview questions"
-        }
       ];
     }
 
     filteredVideos = allVideos;
-
-    if (mounted) {
-      setState(() => loading = false);
-    }
+    if (mounted) setState(() => loading = false);
   }
 
-  void search(String query) {
+  Future<void> search(String query) async {
     setState(() {
       filteredVideos = allVideos.where((video) {
         return video['title']
@@ -160,14 +119,42 @@ Return ONLY JSON:
   }
 
   Future<void> openVideo(String query) async {
-    final url =
-        'https://www.youtube.com/results?search_query=${Uri.encodeComponent(query)}';
+  try {
+    final youtubeAppUri = Uri.parse(
+      'youtube://www.youtube.com/results?search_query=${Uri.encodeComponent(query)}',
+    );
 
+    final youtubeWebUri = Uri.parse(
+      'https://www.youtube.com/results?search_query=${Uri.encodeComponent(query)}',
+    );
+
+    // First try YouTube app
+    if (await canLaunchUrl(youtubeAppUri)) {
+      await launchUrl(
+        youtubeAppUri,
+        mode: LaunchMode.externalApplication,
+      );
+      return;
+    }
+
+    // Fallback to browser
     await launchUrl(
-      Uri.parse(url),
+      youtubeWebUri,
       mode: LaunchMode.externalApplication,
     );
+  } catch (e) {
+    debugPrint('YouTube Launch Error: $e');
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to open YouTube: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
+}
 
   @override
   void dispose() {
@@ -175,235 +162,130 @@ Return ONLY JSON:
     super.dispose();
   }
 
-  Widget _glow(double size, Color color) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xff040B2D),
-      body: Stack(
-        children: [
-          Positioned(
-            top: -100,
-            left: -100,
-            child: _glow(
-              250,
-              Colors.deepPurple.withOpacity(0.25),
+      backgroundColor: isDark ? AppTheme.darkBg : AppTheme.lightBg,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.white10 : Colors.black12,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Icon(Icons.arrow_back_ios_new,
+                          color: isDark ? Colors.white : Colors.black87,
+                          size: 20),
+                    ),
+                  ),
+                  const Spacer(),
+                  Text("AI Videos",
+                      style: TextStyle(
+                        color: isDark ? Colors.white : Colors.black87,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      )),
+                  const Spacer(),
+                ],
+              ),
             ),
-          ),
-          Positioned(
-            bottom: -120,
-            right: -100,
-            child: _glow(
-              260,
-              Colors.purpleAccent.withOpacity(0.18),
-            ),
-          ),
-          Positioned(
-            right: -40,
-            bottom: 120,
-            child: IgnorePointer(
-              child: Opacity(
-                opacity: 0.06,
-                child: Image.asset(
-                  'assets/images/ai_robot.png',
-                  width: 280,
-                  fit: BoxFit.contain,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextField(
+                controller: searchController,
+                onChanged: search,
+                style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+                decoration: InputDecoration(
+                  hintText: "Search videos...",
+                  hintStyle: TextStyle(
+                      color: isDark ? Colors.white54 : Colors.black45),
+                  prefixIcon: Icon(Icons.search,
+                      color: isDark ? Colors.white70 : Colors.black54),
+                  filled: true,
+                  fillColor: isDark ? Colors.white10 : Colors.black12,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
             ),
-          ),
-          SafeArea(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () => Navigator.pop(context),
+            const SizedBox(height: 12),
+            Expanded(
+              child: loading
+                  ? const Center(
+                      child: CircularProgressIndicator(color: AppTheme.primary))
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: filteredVideos.length,
+                      itemBuilder: (_, i) {
+                        final video = filteredVideos[i];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: GestureDetector(
+                            onTap: () => openVideo(video['query']),
                             child: Container(
                               padding: const EdgeInsets.all(14),
                               decoration: BoxDecoration(
-                                color: Colors.white10,
-                                borderRadius: BorderRadius.circular(18),
+                                color: isDark
+                                    ? AppTheme.darkCard
+                                    : AppTheme.lightCard,
+                                borderRadius: BorderRadius.circular(20),
                               ),
-                              child: const Icon(
-                                Icons.arrow_back_ios_new,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                          const Spacer(),
-                          const Text(
-                            "AI Videos",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Spacer(),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [
-                              Color(0xffFF0000),
-                              Color(0xff7B2FF7),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: const Column(
-                          children: [
-                            Icon(
-                              Icons.play_circle_fill,
-                              color: Colors.white,
-                              size: 70,
-                            ),
-                            SizedBox(height: 12),
-                            Text(
-                              "AI Video Recommendations",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      TextField(
-                        controller: searchController,
-                        onChanged: search,
-                        style: const TextStyle(
-                          color: Colors.white,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: "Search videos...",
-                          hintStyle: const TextStyle(
-                            color: Colors.white54,
-                          ),
-                          prefixIcon: const Icon(
-                            Icons.search,
-                            color: Colors.white70,
-                          ),
-                          filled: true,
-                          fillColor: Colors.white10,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(22),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: loading
-                      ? const Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                          ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                          ),
-                          itemCount: filteredVideos.length,
-                          itemBuilder: (_, i) {
-                            final video = filteredVideos[i];
-
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 16),
-                              child: GestureDetector(
-                                onTap: () => openVideo(
-                                  video['query'],
-                                ),
-                                child: Container(
-                                  padding: const EdgeInsets.all(18),
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [
-                                        Color(0xff111C44),
-                                        Color(0xff09122F),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      gradient: AppTheme.aiGradient,
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    child: const Icon(Icons.play_arrow,
+                                        color: Colors.white, size: 22),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(video['title'],
+                                            style: TextStyle(
+                                                color: isDark
+                                                    ? Colors.white
+                                                    : Colors.black87,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 15)),
+                                        const SizedBox(height: 4),
+                                        Text(video['channel'],
+                                            style: TextStyle(
+                                                color: isDark
+                                                    ? Colors.white70
+                                                    : Colors.black54,
+                                                fontSize: 12)),
                                       ],
                                     ),
-                                    borderRadius: BorderRadius.circular(26),
                                   ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(16),
-                                        decoration: BoxDecoration(
-                                          gradient: const LinearGradient(
-                                            colors: [
-                                              Colors.red,
-                                              Colors.pink,
-                                            ],
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(18),
-                                        ),
-                                        child: const Icon(
-                                          Icons.play_arrow,
-                                          color: Colors.white,
-                                          size: 30,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 16),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              video['title'],
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 18,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              video['channel'],
-                                              style: const TextStyle(
-                                                color: Colors.white70,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                ],
                               ),
-                            );
-                          },
-                        ),
-                ),
-              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

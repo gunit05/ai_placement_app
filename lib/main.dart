@@ -64,7 +64,7 @@ class _PlacementAppState extends State<PlacementApp> {
     return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
-      title: 'AI Placement App',
+      title: 'HIREHUB',
       themeMode: themeController.themeMode,
       theme: AppThemes.lightTheme,
       darkTheme: AppThemes.darkTheme,

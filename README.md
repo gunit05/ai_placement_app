@@ -1,346 +1,316 @@
-🚀 AI Placement App – AI Powered Career Growth Platform
+# 🚀 HIRE HUB – AI Powered College Placement Android Application
 
-A powerful Flutter + Supabase + AI powered intelligent placement preparation platform built to help students and job seekers improve employability through:
+HIRE HUB is a next-generation AI-powered placement preparation platform designed to help students and job seekers improve their employability through intelligent career guidance, AI interviews, resume analysis, coding assessments, aptitude preparation, and placement tracking.
 
-AI interviews
-Resume ATS analysis
-Coding interview practice
-Aptitude preparation
-Job tracking
-Career guidance
-AI chatbot assistance
-Admin review systems
+Built with Flutter, Supabase, Artificial Intelligence, and modern cloud technologies, HIRE HUB provides a complete ecosystem for placement preparation and career growth.
 
-This platform combines AI automation + premium modern UI + real interview simulation + analytics to create a complete smart placement ecosystem.
+---
 
-✨ Key Features
-🎯 Placement Preparation
-📚 Aptitude Preparation Module
-Topic-based aptitude preparation
-Interactive MCQ quiz engine
-Live scoring
-Performance analytics
-Placement readiness tracking
-💻 Coding Practice & Interview Preparation
+## ✨ Key Features
 
-Interactive coding interview simulator with real code execution.
+### 🎯 Placement Preparation
 
-Features:
+* Aptitude preparation with topic-wise quizzes
+* Placement readiness tracking
+* Performance analytics dashboard
+* Interactive MCQ engine with scoring
 
-Python / Java / C / C++ coding support
-Judge0 code execution integration
-Live code compilation
-Coding interview timer
-Random interview questions
-Output validation
-Correct / wrong answer detection
-Auto question switching
-Admin coding submission review
-Code + output storage in database
-Coding analytics tracking
-📄 Resume & ATS Analysis
-🤖 Hybrid ATS Resume Analysis (Latest 🔥)
+### 💻 Coding Interview Preparation
 
-Advanced resume intelligence engine combining:
+* Multi-language coding support
+* Python, Java, C, and C++
+* Judge0 API integration
+* Real-time code execution
+* Coding interview timer
+* Random coding questions
+* Output validation
+* Submission tracking
+* Admin coding review system
 
-Manual ATS Engine
-Keyword matching
-Skills gap analysis
-Missing skills detection
-ATS compatibility scoring
-AI ATS Engine (Groq AI)
+### 📄 AI Resume & ATS Analysis
 
-Powered by Groq API.
+#### Hybrid ATS Resume Intelligence
+
+* ATS compatibility scoring
+* Keyword matching
+* Skills gap analysis
+* Missing skills detection
+* Resume improvement suggestions
+
+#### AI Resume Analysis
+
+Powered by Groq AI and Generative AI.
 
 Features:
 
-AI resume analysis
-Resume strengths detection
-ATS suggestions
-Role-specific scoring
-Intelligent resume feedback
-Resume System Features
-PDF resume upload
-Resume parsing
-Resume text extraction
-Resume bucket storage (Supabase Storage)
-Resume analytics dashboard
-Resume improvement suggestions
-Admin resume review
-Manual admin override scoring
-Resume PDF preview
-PDF report generation
-🎤 AI Interview System (Premium Feature 🔥)
+* Resume strengths detection
+* Intelligent ATS recommendations
+* Role-based resume scoring
+* AI-generated feedback
+* Resume optimization suggestions
 
-Complete smart interview simulation engine.
+#### Resume Management
 
-Features:
+* PDF resume upload
+* Resume parsing and text extraction
+* Supabase Storage integration
+* Resume analytics dashboard
+* Resume PDF preview
+* PDF report generation
+* Admin review and scoring override
 
-Speech-to-text answer recognition
-AI voice questions (Text-to-Speech)
-Auto timer per question
-Auto next question flow
-Live answer scoring
-AI performance analytics
-Interview feedback
-Improvement suggestions
-Interview result dashboard
-PDF interview report generation
-Watermark + date/time reports
-🎥 Video Interview System
+### 🎤 AI Interview System
 
-Real interview simulation with front camera capture.
+A complete AI-driven mock interview platform.
 
 Features:
 
-Front camera interview recording
-Auto start / auto stop recording
-Video replay support
-Cloudinary video upload
-Supabase video URL storage
-Video performance review
-Admin monitoring support
-🤖 AI Assistant
+* Speech-to-text recognition
+* AI-generated interview questions
+* Text-to-Speech voice interaction
+* Live answer evaluation
+* Automatic scoring
+* Interview analytics
+* Performance insights
+* PDF interview reports
+* Improvement recommendations
 
-Built-in intelligent chatbot assistant.
+### 🎥 Video Interview System
 
-Helps with:
+* Front camera interview recording
+* Video replay support
+* Cloudinary upload integration
+* Supabase video storage
+* Admin monitoring
+* Interview recording analytics
 
-Career guidance
-Interview preparation
-Resume suggestions
-Skill recommendations
-Placement FAQs
-Job guidance
-Learning roadmap
-💼 Jobs & Placement Management
+### 🤖 AI Career Assistant
 
-Features:
+Intelligent chatbot for:
 
-Live job listings
-Job applications tracker
-Shortlisting dashboard
-Job recommendations
-Placement alerts
-Application status tracking
-Career role suggestions
-👤 Authentication & Security
+* Career guidance
+* Resume assistance
+* Interview preparation
+* Learning roadmaps
+* Skill recommendations
+* Placement FAQs
+* Job search guidance
 
-Secure auth system powered by Supabase.
+### 💼 Jobs & Placement Management
 
-Features:
+* Live job opportunities
+* Job application tracking
+* Placement alerts
+* Candidate shortlisting
+* Job recommendations
+* Career role suggestions
+* Application status monitoring
 
-Login
-Signup
-Forgot password
-Password reset flow
-Smart auth gate
-Session persistence
-Secure logout
-Biometric authentication
-Face lock authentication
-Profile management
-Profile image upload
-💬 Feedback & Support Chat (Latest 🔥)
+### 👤 Authentication & Security
 
-Modern real-time support chat system.
+Powered by Supabase Authentication.
 
 Features:
 
-User feedback messaging
-Admin reply system
-Real-time chat updates
-Chat bubble UI
-Support conversation history
-Pending/replied status tracking
-Dark/light mode support
-🛠️ Admin Dashboard
+* Login & Signup
+* Forgot Password
+* Password Reset
+* Secure Session Management
+* Smart Authentication Gate
+* Biometric Authentication
+* Face Lock Authentication
+* Profile Management
+* Profile Image Upload
 
-Powerful admin control system.
+### 💬 Real-Time Feedback & Support Chat
 
-Admin Features:
+* User feedback system
+* Admin reply management
+* Real-time messaging
+* Modern chat interface
+* Conversation history
+* Support ticket tracking
+* Dark and Light theme support
 
-User monitoring
-Analytics dashboard
-Resume review
-Resume manual scoring
-Resume override scoring
-Coding interview review
-Coding submissions monitoring
-Job management
-Shortlisting candidates
-Feedback chat monitoring
-Application analytics
-System insights
-🎨 Premium UI Highlights
+### 🛠️ Admin Dashboard
 
-Modern futuristic premium design.
+Comprehensive admin management system:
 
-Features:
+* User Monitoring
+* Resume Review
+* Resume Score Override
+* Coding Submission Review
+* Placement Analytics
+* Feedback Management
+* Job Management
+* Candidate Shortlisting
+* System Insights Dashboard
 
-Glassmorphism UI
-Animated splash screen
-Premium dashboard
-AI glowing backgrounds
-Smooth animations
-Gradient cards
-Floating effects
-Coding IDE style interface
-Chat-style support system
-Responsive layouts
-Light mode / dark mode support
-Premium onboarding visuals
-🛠️ Tech Stack
-Frontend
-Flutter (Dart)
-Backend
-Supabase
-Database
-PostgreSQL
-Authentication
-Supabase Auth
-Storage
-Supabase Storage
-Cloudinary
-AI / APIs
-Groq API
-Google Generative AI
-Judge0 API
-Libraries
-speech_to_text
-flutter_tts
-local_auth
-camera
-video_player
-image_picker
-file_picker
-syncfusion_flutter_pdf
-pdf
-printing
-flutter_dotenv
-fl_chart
-🔥 Latest Updates
-Version Highlights
-AI & Resume
+---
 
-✅ Hybrid ATS Resume Scoring
-✅ Groq AI Resume Intelligence
-✅ AI Strengths & Suggestions
-✅ Resume bucket storage
-✅ Resume admin override scoring
-✅ Resume PDF preview fixes
+## 🎨 Premium UI Features
 
-Coding System
+* Modern Glassmorphism Design
+* Animated Splash Screen
+* AI-Themed Dashboard
+* Gradient Cards
+* Smooth Animations
+* Responsive Layouts
+* Premium Onboarding Experience
+* Coding IDE Interface
+* Light & Dark Mode Support
+* Professional User Experience
 
-✅ Judge0 coding execution integration
-✅ Multi-language coding interview
-✅ Coding timer
-✅ Random question generator
-✅ Coding admin review dashboard
-✅ Submission logging to database
-✅ Code + output tracking
+---
 
-Feedback System
+## 🛠️ Technology Stack
 
-✅ Real-time support chat
-✅ Admin reply visibility
-✅ Modern chat UI redesign
+### Frontend
 
-UI/UX
+* Flutter (Dart)
 
-✅ Premium UI redesign
-✅ Animated futuristic splash screen
-✅ Modern dashboard redesign
-✅ Light/dark mode support
-✅ Profile redesign
-✅ Premium coding interface
+### Backend
 
-Video Interview
+* Supabase
 
-✅ Video interview recording
-✅ Cloudinary upload
-✅ Video URL storage
-✅ Replay support
+### Database
 
-Security/Auth
+* PostgreSQL
 
-✅ Smart auth gate
-✅ Face lock biometric authentication
-✅ Forgot password flow
-✅ Reset password flow
-✅ Secure session handling
+### Authentication
 
-Admin
+* Supabase Auth
 
-✅ Resume review modules
-✅ Coding monitoring
-✅ Feedback management
-✅ Analytics dashboard
+### Storage
 
-📂 Project Structure
+* Supabase Storage
+* Cloudinary
+
+### Artificial Intelligence
+
+* Groq AI
+* Google Generative AI
+
+### APIs
+
+* Judge0 API
+
+### Libraries
+
+* speech_to_text
+* flutter_tts
+* local_auth
+* camera
+* video_player
+* image_picker
+* file_picker
+* syncfusion_flutter_pdf
+* pdf
+* printing
+* fl_chart
+* flutter_dotenv
+
+---
+
+## 🔥 Latest Updates
+
+### AI Resume Intelligence
+
+* Hybrid ATS Scoring
+* Groq AI Resume Analysis
+* Resume Strength Detection
+* AI Resume Suggestions
+* Resume Analytics Dashboard
+
+### Coding Platform
+
+* Judge0 Integration
+* Multi-Language Support
+* Coding Interview Timer
+* Random Question Engine
+* Submission Analytics
+
+### Video Interviews
+
+* Interview Recording
+* Cloudinary Upload
+* Replay Support
+* Secure Storage
+
+### Support System
+
+* Real-Time Chat
+* Admin Feedback Management
+* Modern Chat UI
+
+### Security
+
+* Face Lock Authentication
+* Biometric Login
+* Secure Session Handling
+* Password Recovery Flow
+
+---
+
+## 📂 Project Structure
+
+```text
 lib/
- ├── screens/
- │    ├── splash_screen.dart
- │    ├── login_screen.dart
- │    ├── signup_screen.dart
- │    ├── dashboard_screen.dart
- │    ├── profile_screen.dart
- │    ├── chatbot_screen.dart
- │    ├── aptitude_screen.dart
- │    ├── quiz_screen.dart
- │    ├── coding_interview_screen.dart
- │    ├── interview_screen.dart
- │    ├── interview_result_screen.dart
- │    ├── resume_upload_screen.dart
- │    ├── resume_score_screen.dart
- │    ├── jobs_screen.dart
- │    ├── shortlist_dashboard.dart
- │    └── admin/
- │         ├── admin_resume_list_screen.dart
- │         ├── admin_coding_list_screen.dart
- │
- ├── widgets/
- │    ├── feedback_dialog.dart
- │
- ├── services/
- │    ├── auth_gate.dart
- │
- ├── theme/
- │    ├── premium_ui.dart
- │    ├── theme_controller.dart
- │
- └── main.dart
-⚙️ Installation
-git clone https://github.com/gunit05/ai_placement_app.git
-cd ai_placement_app
+├── screens/
+├── widgets/
+├── services/
+├── theme/
+└── main.dart
+```
+
+---
+
+## ⚙️ Installation
+
+```bash
+git clone https://github.com/gunit05/hire_hub.git
+
+cd hire_hub
+
 flutter pub get
+
 flutter run
-🎯 Project Vision
+```
 
-This application is built to:
+---
 
-✔ Help students prepare smarter for placements
-✔ Simulate real AI interviews
-✔ Improve resumes with ATS intelligence
-✔ Track coding performance
-✔ Provide job recommendations
-✔ Deliver AI-based career guidance
-✔ Make placement preparation modern, smart, and accessible
+## 🎯 Project Vision
 
-👨‍💻 Developer
+HIRE HUB aims to revolutionize placement preparation by combining Artificial Intelligence, Career Guidance, Resume Intelligence, Coding Assessments, and Interview Simulation into a single smart platform.
 
-Gunit Raj
+Our mission is to:
 
-📧 gunitraj90@gmail.com
+✔ Improve student employability
+✔ Simulate real-world interviews
+✔ Enhance resumes using AI and ATS intelligence
+✔ Track coding and aptitude performance
+✔ Deliver personalized career guidance
+✔ Connect students with placement opportunities
+✔ Make placement preparation smarter and more accessible
 
-🔗 https://www.linkedin.com/in/gunit-raj-66b25421b/
+---
 
-📱 +91 6205449441
+## 👨‍💻 Developer
 
-⭐ Support
+**Gunit Raj**
+
+📧 Email: [gunitraj90@gmail.com](mailto:gunitraj90@gmail.com)
+
+🔗 LinkedIn: https://www.linkedin.com/in/gunit-raj-66b25421b/
+
+---
+
+## ⭐ Support
 
 If you found this project useful:
 
-⭐ Give this repository a STAR on GitHub
+⭐ Star this repository on GitHub
 
-Contributions, suggestions, and feedback are welcome 🚀
+Contributions, suggestions, and feedback are always welcome.
+
+**Prepare Smarter. Practice Better. Get Hired with HIRE HUB. 🚀**

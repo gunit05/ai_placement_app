@@ -206,7 +206,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    "Login to continue your AI placement journey",
+                    "Login to continue your HIREHUB journey",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: isDark ? Colors.white70 : Colors.black54,

@@ -1,5 +1,7 @@
-name: ai_placement_app
-description: AI Placement & Career Guidance Mobile App
+name: hire_hub
+
+description: "HIRE HUB: AI-Powered College Placement Android Application"
+
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -14,7 +16,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   local_auth: ^2.1.6
   image_picker: ^1.1.2
-
+ 
   # Supabase
   supabase_flutter: ^2.5.6
 

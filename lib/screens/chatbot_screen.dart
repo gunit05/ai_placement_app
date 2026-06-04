@@ -20,7 +20,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   bool loading = false;
 
   final String apiKey = dotenv.env['GROQ_API_KEY'] ?? '';
-
+  final FocusNode focusNode = FocusNode();
   final List<Map<String, dynamic>> faq = [
     {
       "keywords": ["hello", "hi", "hey"],
@@ -28,23 +28,19 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     },
     {
       "keywords": ["job", "career"],
-      "answer":
-          "Go to Jobs section and apply for suitable opportunities."
+      "answer": "Go to Jobs section and apply for suitable opportunities."
     },
     {
       "keywords": ["resume"],
-      "answer":
-          "Upload your resume for AI analysis and ATS scoring."
+      "answer": "Upload your resume for AI analysis and ATS scoring."
     },
     {
       "keywords": ["interview"],
-      "answer":
-          "Use AI mock interview module for realistic practice."
+      "answer": "Use AI mock interview module for realistic practice."
     },
     {
       "keywords": ["skills"],
-      "answer":
-          "Add your skills for better AI recommendations."
+      "answer": "Add your skills for better AI recommendations."
     },
     {
       "keywords": ["who are you", "what can you do"],
@@ -124,10 +120,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
               "content":
                   "You are an AI placement assistant. Help with careers, jobs, interviews, resume review, aptitude and skill guidance. Keep responses concise and helpful."
             },
-            {
-              "role": "user",
-              "content": text
-            }
+            {"role": "user", "content": text}
           ],
           "temperature": 0.7,
           "max_tokens": 500
@@ -138,27 +131,21 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final aiReply =
-            data['choices'][0]['message']['content'];
+        final aiReply = data['choices'][0]['message']['content'];
 
         setState(() {
           messages.add({"bot": aiReply});
         });
       } else {
         setState(() {
-          messages.add({
-            "bot":
-                "API Error ${response.statusCode}"
-          });
+          messages.add({"bot": "API Error ${response.statusCode}"});
         });
       }
     } catch (_) {
       if (!mounted) return;
 
       setState(() {
-        messages.add({
-          "bot": "Connection failed. Try again."
-        });
+        messages.add({"bot": "Connection failed. Try again."});
       });
     } finally {
       if (mounted) {
@@ -187,18 +174,14 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   }
 
   Widget buildBubble(String text, bool isBot) {
-    final isDark =
-        Theme.of(context).brightness == Brightness.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Align(
-      alignment: isBot
-          ? Alignment.centerLeft
-          : Alignment.centerRight,
+      alignment: isBot ? Alignment.centerLeft : Alignment.centerRight,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
         padding: const EdgeInsets.all(16),
-        constraints:
-            const BoxConstraints(maxWidth: 300),
+        constraints: const BoxConstraints(maxWidth: 300),
         decoration: BoxDecoration(
           gradient: isBot
               ? LinearGradient(
@@ -225,9 +208,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: isBot
-                  ? Colors.black12
-                  : AppTheme.primary.withOpacity(0.25),
+              color:
+                  isBot ? Colors.black12 : AppTheme.primary.withOpacity(0.25),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -236,11 +218,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         child: Text(
           text,
           style: TextStyle(
-            color: isBot
-                ? (isDark
-                    ? Colors.white
-                    : Colors.black87)
-                : Colors.white,
+            color:
+                isBot ? (isDark ? Colors.white : Colors.black87) : Colors.white,
             height: 1.5,
           ),
         ),
@@ -249,8 +228,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   }
 
   Widget quickChip(String text) {
-    final isDark =
-        Theme.of(context).brightness == Brightness.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: () {
@@ -263,20 +241,16 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
           vertical: 10,
         ),
         decoration: BoxDecoration(
-          color:
-              isDark ? Colors.white10 : Colors.white,
+          color: isDark ? Colors.white10 : Colors.white,
           borderRadius: BorderRadius.circular(22),
           border: Border.all(
-            color:
-                isDark ? Colors.white12 : Colors.black12,
+            color: isDark ? Colors.white12 : Colors.black12,
           ),
         ),
         child: Text(
           text,
           style: TextStyle(
-            color: isDark
-                ? Colors.white70
-                : Colors.black54,
+            color: isDark ? Colors.white70 : Colors.black54,
           ),
         ),
       ),
@@ -307,16 +281,38 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+
+    focusNode.addListener(() {
+      if (focusNode.hasFocus) {
+        Future.delayed(
+          const Duration(milliseconds: 350),
+          () {
+            if (!scrollController.hasClients) return;
+
+            scrollController.animateTo(
+              scrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            );
+          },
+        );
+      }
+    });
+  }
+
+  @override
   void dispose() {
     controller.dispose();
     scrollController.dispose();
+    focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark =
-        Theme.of(context).brightness == Brightness.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return PremiumScreen(
       title: "AI Assistant",
@@ -333,7 +329,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                     height: 110,
                     width: 110,
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       gradient: AppTheme.primaryGradient,
                       shape: BoxShape.circle,
                     ),
@@ -341,34 +337,24 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                       'assets/icon/ai_robot.png',
                     ),
                   ),
-
                   const SizedBox(height: 18),
-
                   Text(
                     "Ask AI Assistant",
                     style: TextStyle(
-                      color: isDark
-                          ? Colors.white
-                          : Colors.black87,
+                      color: isDark ? Colors.white : Colors.black87,
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-
                   const SizedBox(height: 10),
-
                   Text(
-                    "Jobs, resume, interviews, aptitude & career guidance",
+                    "Jobs, Resume, Interviews, Aptitude & Career Guidance",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: isDark
-                          ? Colors.white70
-                          : Colors.black54,
+                      color: isDark ? Colors.white70 : Colors.black54,
                     ),
                   ),
-
                   const SizedBox(height: 18),
-
                   Wrap(
                     spacing: 10,
                     runSpacing: 10,
@@ -382,12 +368,14 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 ],
               ),
             ),
-
           const SizedBox(height: 14),
-
           Expanded(
             child: ListView.builder(
               controller: scrollController,
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom + 100,
+              ),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               itemCount: messages.length,
               itemBuilder: (_, i) {
                 final msg = messages[i];
@@ -400,52 +388,60 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
               },
             ),
           ),
-
           if (loading) typingIndicator(),
-
-          PremiumCard(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 8,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: controller,
-                    onSubmitted: (_) => sendMessage(),
-                    style: TextStyle(
-                      color: isDark
-                          ? Colors.white
-                          : Colors.black87,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: "Ask anything...",
-                      hintStyle: TextStyle(
-                        color: isDark
-                            ? Colors.white54
-                            : Colors.black45,
+          SafeArea(
+            top: false,
+            child: AnimatedPadding(
+              duration: const Duration(milliseconds: 200),
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: PremiumCard(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        focusNode: focusNode,
+                        controller: controller,
+                        textInputAction: TextInputAction.send,
+                        minLines: 1,
+                        maxLines: 4,
+                        onSubmitted: (_) => sendMessage(),
+                        style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: "Ask anything...",
+                          hintStyle: TextStyle(
+                            color: isDark ? Colors.white54 : Colors.black45,
+                          ),
+                          border: InputBorder.none,
+                        ),
                       ),
-                      border: InputBorder.none,
                     ),
-                  ),
+                    const SizedBox(width: 10),
+                    InkWell(
+                      borderRadius: BorderRadius.circular(50),
+                      onTap: sendMessage,
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: AppTheme.primaryGradient,
+                        ),
+                        child: const Icon(
+                          Icons.send_rounded,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                GestureDetector(
-                  onTap: sendMessage,
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient:
-                          AppTheme.primaryGradient,
-                    ),
-                    child: const Icon(
-                      Icons.send_rounded,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ],

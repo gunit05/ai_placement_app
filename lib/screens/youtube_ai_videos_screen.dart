@@ -96,6 +96,21 @@ Return ONLY valid JSON.
           "channel": "Fallback",
           "query": "dsa interview preparation"
         },
+        {
+          "title": "Aptitude Tricks for Placements",
+          "channel": "Fallback",
+          "query": "aptitude tricks for placements"
+        },
+        {
+          "title": "HR Interview Tips",
+          "channel": "Fallback",
+          "query": "hr interview tips for freshers"
+        },
+        {
+          "title": "Python Interview Questions",
+          "channel": "Fallback",
+          "query": "python interview questions"
+        },
       ];
     }
 

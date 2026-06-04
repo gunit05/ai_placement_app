@@ -205,7 +205,7 @@ class _SplashScreenState extends State<SplashScreen>
           ),
           const SizedBox(height: 8),
           const Text(
-            "AI Placement App",
+            "HIREHUB: Your AI-Powered College Placement Application ",
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white70,
@@ -231,7 +231,7 @@ class _SplashScreenState extends State<SplashScreen>
           ),
           const SizedBox(height: 14),
           const Text(
-            "Loading...",
+            "Loading your personalized experience...",
             style: TextStyle(
               color: Colors.white60,
               fontSize: 13,

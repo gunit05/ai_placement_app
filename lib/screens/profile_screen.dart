@@ -171,9 +171,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             ),
           ),
           content: Text(
-            "AI Placement App\n\n"
-            "Version: ${info.version} (${info.buildNumber})\n\n"
-            "AI-powered interview preparation, resume analysis, career coaching, and placement assistance.",
+            "HIREHUB: Your AI-Powered College Placement App\n\nVersion: ${info.version}\nBuild: ${info.buildNumber}\n\nDeveloped by Team HIREHUB",
             style: TextStyle(
               color: isDark
                   ? Colors.white70

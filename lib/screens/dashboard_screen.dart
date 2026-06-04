@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:local_auth/local_auth.dart';
 
+import 'notifications_screen.dart';
 import 'ai_skill_onboarding_screen.dart';
 import 'resume_upload_screen.dart';
 import 'resume_score_screen.dart';
@@ -133,13 +134,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark =
-        Theme.of(context).brightness == Brightness.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (loading) {
       return Scaffold(
-        backgroundColor:
-            isDark ? AppTheme.darkBg : AppTheme.lightBg,
+        backgroundColor: isDark ? AppTheme.darkBg : AppTheme.lightBg,
         body: const Center(
           child: CircularProgressIndicator(
             color: AppTheme.primary,
@@ -163,8 +162,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ];
 
     return Scaffold(
-      backgroundColor:
-          isDark ? AppTheme.darkBg : AppTheme.lightBg,
+      backgroundColor: isDark ? AppTheme.darkBg : AppTheme.lightBg,
       body: IndexedStack(
         index: index,
         children: pages,
@@ -216,8 +214,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     int itemIndex,
   ) {
     final selected = index == itemIndex;
-    final isDark =
-        Theme.of(context).brightness == Brightness.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Expanded(
       child: GestureDetector(
@@ -236,9 +233,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon,
                 color: selected
                     ? Colors.white
-                    : (isDark
-                        ? Colors.white54
-                        : Colors.black54),
+                    : (isDark ? Colors.white54 : Colors.black54),
               ),
               const SizedBox(height: 4),
               Text(
@@ -248,9 +243,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   fontWeight: FontWeight.w600,
                   color: selected
                       ? Colors.white
-                      : (isDark
-                          ? Colors.white54
-                          : Colors.black54),
+                      : (isDark ? Colors.white54 : Colors.black54),
                 ),
               ),
             ],
@@ -269,9 +262,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         "page": ResumeUploadScreen(username: widget.username),
       },
       {
-        "title": "AI ATS Score",
-        "subtitle": "Get AI-powered insights on your resume",
-        "icon": Icons.verified,
+        "title": "AI Resume Analyzer",
+        "subtitle": "ATS + AI Resume Review",
+        "icon": Icons.description_rounded,
         "page": ResumeScoreScreen(username: widget.username),
       },
       {
@@ -281,69 +274,76 @@ class _DashboardScreenState extends State<DashboardScreen> {
         "page": JobsScreen(username: widget.username),
       },
       {
-        "title": "History",
+        "title": "Application History",
         "subtitle": "View your application history",
         "icon": Icons.history,
         "page": ApplicationHistoryScreen(username: widget.username),
       },
       {
-        "title": "AI Aptitude",
-        "subtitle": "Test your cognitive abilities",
+        "title": "Aptitude Tests",
+        "subtitle": "Sharpen your skills",
         "icon": Icons.school,
         "page": AptitudeScreen(username: widget.username),
       },
       {
-        "title": "AI Quiz",
+        "title": "Quizzes",
         "subtitle": "Test your knowledge",
         "icon": Icons.quiz,
         "page": QuizScreen(username: widget.username),
       },
       {
         "title": "AI Chatbot",
-        "subtitle": "Get instant help with your questions",
+        "subtitle": "Career guidance assistant",
         "icon": Icons.smart_toy,
         "page": const ChatbotScreen(),
       },
       {
+        "title": "Career Mentor",
+        "subtitle": "Personalized AI Guidance",
+        "icon": Icons.psychology,
+        "page": AICareerGuidanceScreen(username: widget.username),
+      },
+      {
+        "title": "Notifications",
+        "subtitle": "Stay updated with latest alerts",
+        "icon": Icons.notifications,
+        "page": NotificationsScreen(username: widget.username),
+      },
+      {
         "title": "AI Videos",
-        "subtitle": "Curated YouTube content based on your skills",
+        "subtitle": "Curated learning content",
         "icon": Icons.video_library,
         "page": YoutubeAiVideosScreen(username: widget.username),
       },
       {
-        "title": "AI Interview",
-        "subtitle": "Mock interview with AI feedback",
+        "title": "Mock Interview",
+        "subtitle": "Real AI Interview Simulation",
         "icon": Icons.mic,
         "page": InterviewScreen(username: widget.username),
       },
       {
-        "title": "Coding Practice",
-        "subtitle": "Improve your coding skills",
+        "title": "Coding Arena",
+        "subtitle": "Practice & Get Evaluated",
         "icon": Icons.code,
         "page": CodingInterviewScreen(username: widget.username),
-      },
-      {
-        "title": "AI Career  Guidance",
-        "subtitle": "Get personalized career advice",
-        "icon": Icons.psychology,
-        "page": AICareerGuidanceScreen(username: widget.username),
       },
     ];
 
     return PremiumScreen(
       title: "Explore",
-      subtitle: "AI placement toolkit",
+      subtitle: "Discover AI-Powered Tools",
       icon: Icons.dashboard_customize,
+      scrollable: false,
       child: GridView.builder(
         shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
+        primary: false,
+        padding: const EdgeInsets.only(bottom: 100),
         itemCount: items.length,
-        gridDelegate:
-            const SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          crossAxisSpacing: 18,
-          mainAxisSpacing: 18,
-          childAspectRatio: 0.95,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 0.90,
         ),
         itemBuilder: (_, i) {
           final item = items[i];
@@ -353,35 +353,49 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: PremiumCard(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       gradient: AppTheme.primaryGradient,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(18),
                     ),
                     child: Icon(
                       item['icon'] as IconData,
                       color: Colors.white,
-                      size: 28,
+                      size: 26,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   Text(
                     item['title'] as String,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : Colors.black87,
                     ),
                   ),
-                  if (item['subtitle'] != null)
-                    Text(
-                      item['subtitle'] as String,
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: Colors.white54,
-                      ),
+                  const SizedBox(height: 6),
+                  Text(
+                    item['subtitle'] as String,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 10,
+                      height: 1.3,
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white70
+                          : Colors.grey.shade700,
                     ),
+                  ),
                 ],
               ),
             ),

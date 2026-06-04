@@ -167,7 +167,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    "Start your AI placement journey",
+                    "Start your HIREHUB journey",
                     style: TextStyle(
                       color: isDark ? Colors.white70 : Colors.black54,
                     ),

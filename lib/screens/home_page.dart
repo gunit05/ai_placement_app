@@ -37,8 +37,14 @@ class HomePage extends StatelessWidget {
       backgroundColor: isDark ? AppTheme.darkBg : AppTheme.lightBg,
       body: Stack(
         children: [
-          Positioned(top: -120, left: -80, child: _glow(260, AppTheme.primary.withOpacity(0.22))),
-          Positioned(bottom: -140, right: -100, child: _glow(300, Colors.blue.withOpacity(0.10))),
+          Positioned(
+              top: -120,
+              left: -80,
+              child: _glow(260, AppTheme.primary.withOpacity(0.22))),
+          Positioned(
+              bottom: -140,
+              right: -100,
+              child: _glow(300, Colors.blue.withOpacity(0.10))),
           SafeArea(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
@@ -63,38 +69,44 @@ class HomePage extends StatelessWidget {
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              "Your AI Placement Dashboard",
+                              "Welcome back to HIREHUB",
                               style: TextStyle(
                                 color: isDark ? Colors.white70 : Colors.black54,
-                                fontSize: 14,
+                                fontSize: 16,
                               ),
                             ),
                           ],
                         ),
                       ),
+
                       /// EDIT AI PROFILE ICON
                       GestureDetector(
-                        onTap: () => go(context, AiSkillOnboardingScreen(username: username)),
+                        onTap: () => go(context,
+                            AiSkillOnboardingScreen(username: username)),
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: isDark ? Colors.white12 : Colors.black12,
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(Icons.edit, color: isDark ? Colors.white70 : Colors.black54),
+                          child: Icon(Icons.edit,
+                              color: isDark ? Colors.white70 : Colors.black54),
                         ),
                       ),
                       const SizedBox(width: 12),
+
                       /// NOTIFICATIONS ICON
                       GestureDetector(
-                        onTap: () => go(context, NotificationsScreen(username: username)),
+                        onTap: () => go(
+                            context, NotificationsScreen(username: username)),
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: isDark ? Colors.white12 : Colors.black12,
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(Icons.notifications_rounded, color: isDark ? Colors.white70 : Colors.black54),
+                          child: Icon(Icons.notifications_rounded,
+                              color: isDark ? Colors.white70 : Colors.black54),
                         ),
                       ),
                     ],
@@ -121,7 +133,7 @@ class HomePage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          "Step into the Future of Job Hunting with AI-Powered Tools",
+                          "Your AI-Powered Career Companion",
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 26,
@@ -134,13 +146,15 @@ class HomePage extends StatelessWidget {
                           skills.isEmpty
                               ? "Smart interview prep, resume analysis & career growth."
                               : "Top skills: ${skills.take(3).join(", ")}",
-                          style: const TextStyle(color: Colors.white70, height: 1.5),
+                          style: const TextStyle(
+                              color: Colors.white70, height: 1.5),
                         ),
                         const SizedBox(height: 20),
                         PremiumButton(
                           text: "Start Interview Prep",
                           icon: Icons.arrow_forward,
-                          onTap: () => go(context, InterviewScreen(username: username)),
+                          onTap: () =>
+                              go(context, InterviewScreen(username: username)),
                         ),
                       ],
                     ),
@@ -166,86 +180,120 @@ class HomePage extends StatelessWidget {
                     mainAxisSpacing: 16,
                     childAspectRatio: 0.95,
                     children: [
-                      _quickCard(context, isDark, Icons.upload_file, "Upload Resume",
+                      _quickCard(
+                          context,
+                          isDark,
+                          Icons.upload_file,
+                          "Upload Resume",
                           ResumeUploadScreen(username: username)),
-                      _quickCard(context, isDark, Icons.smart_toy, "AI Chatbot", const ChatbotScreen()),
-                      _quickCard(context, isDark, Icons.quiz, "AI Quiz", QuizScreen(username: username)),
-                      _quickCard(context, isDark, Icons.school, "AI Aptitude", AptitudeScreen(username: username)),
+                      _quickCard(context, isDark, Icons.smart_toy, "AI Chatbot",
+                          const ChatbotScreen()),
+                      _quickCard(context, isDark, Icons.quiz, "AI Quiz",
+                          QuizScreen(username: username)),
+                      _quickCard(context, isDark, Icons.school, "AI Aptitude",
+                          AptitudeScreen(username: username)),
                     ],
                   ),
 
                   const SizedBox(height: 30),
 
                   /// CAREER INSIGHTS SECTION
-                  if (recommendedRole.isNotEmpty)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Career Insights",
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
+
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Career Insights",
+                        style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(height: 16),
-                        PremiumCard(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Recommended Role",
-                                style: TextStyle(
-                                  color: isDark ? Colors.white70 : Colors.black54,
-                                  fontSize: 14,
-                                ),
+                      ),
+                      const SizedBox(height: 16),
+                      PremiumCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Recommended Role",
+                              style: TextStyle(
+                                color: isDark ? Colors.white70 : Colors.black54,
+                                fontSize: 14,
                               ),
-                              const SizedBox(height: 6),
-                              Text(
-                                recommendedRole,
-                                style: TextStyle(
-                                  color: AppTheme.primary,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              recommendedRole.isNotEmpty
+                                  ? recommendedRole
+                                  : "AI Engineer",
+                              style: TextStyle(
+                                color: AppTheme.primary,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
                               ),
-                              const SizedBox(height: 8),
-                              Text(
-                                "Expected Salary: $salaryRange",
-                                style: TextStyle(
-                                  color: isDark ? Colors.amber : Colors.deepOrange,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              "Expected Salary: ${salaryRange.isNotEmpty ? salaryRange : "₹6 LPA - ₹15 LPA"}",
+                              style: TextStyle(
+                                color:
+                                    isDark ? Colors.amber : Colors.deepOrange,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
                               ),
-                              const SizedBox(height: 12),
-                              ...aiSuggestions.map(
-                                (s) => Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 4),
-                                  child: Row(
-                                    children: [
-                                      const Icon(Icons.check_circle, color: Colors.greenAccent, size: 18),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          s,
-                                          style: TextStyle(
-                                            color: isDark ? Colors.white70 : Colors.black87,
-                                            fontSize: 14,
-                                          ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              "AI Suggestions",
+                              style: TextStyle(
+                                color: AppTheme.primary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            ...(aiSuggestions.isEmpty
+                                    ? [
+                                        "Improve Resume ATS Score",
+                                        "Practice Aptitude Daily",
+                                        "Build Real Flutter Projects",
+                                        "Prepare Mock Interviews",
+                                      ]
+                                    : aiSuggestions)
+                                .map(
+                              (s) => Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4,
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.check_circle,
+                                      color: Colors.green,
+                                      size: 18,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        s,
+                                        style: TextStyle(
+                                          color: isDark
+                                              ? Colors.white70
+                                              : Colors.black87,
+                                          fontSize: 14,
                                         ),
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 40),
                 ],
               ),
@@ -256,7 +304,8 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _quickCard(BuildContext context, bool isDark, IconData icon, String title, Widget page) {
+  Widget _quickCard(BuildContext context, bool isDark, IconData icon,
+      String title, Widget page) {
     return GestureDetector(
       onTap: () => go(context, page),
       child: PremiumCard(

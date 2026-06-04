@@ -19,14 +19,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   List notifications = [];
   bool loading = true;
 
-  final List<List<Color>> gradients = [
-    [const Color(0xffFF6A00), const Color(0xffEE0979)],
-    [const Color(0xff00C9FF), const Color(0xff92FE9D)],
-    [const Color(0xff8E2DE2), const Color(0xff4A00E0)],
-    [const Color(0xffFC466B), const Color(0xff3F5EFB)],
-    [const Color(0xff11998E), const Color(0xff38EF7D)],
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -54,9 +46,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text(
-            "Failed to load notifications",
-          ),
+          content: const Text("Failed to load notifications"),
           backgroundColor: AppTheme.primary,
         ),
       );
@@ -65,45 +55,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   IconData getIcon(String msg) {
     final text = msg.toLowerCase();
-
-    if (text.contains("selected")) {
-      return Icons.check_circle;
-    }
-
-    if (text.contains("rejected")) {
-      return Icons.cancel;
-    }
-
-    if (text.contains("interview")) {
-      return Icons.mic;
-    }
-
-    if (text.contains("job")) {
-      return Icons.work;
-    }
-
+    if (text.contains("selected")) return Icons.check_circle;
+    if (text.contains("rejected")) return Icons.cancel;
+    if (text.contains("interview")) return Icons.mic;
+    if (text.contains("job")) return Icons.work;
     return Icons.notifications_active;
   }
 
   String getTitle(String msg) {
     final text = msg.toLowerCase();
-
-    if (text.contains("selected")) {
-      return "Congratulations 🎉";
-    }
-
-    if (text.contains("rejected")) {
-      return "Application Update";
-    }
-
-    if (text.contains("interview")) {
-      return "Interview Alert";
-    }
-
-    if (text.contains("job")) {
-      return "Job Update";
-    }
-
+    if (text.contains("selected")) return "Congratulations 🎉";
+    if (text.contains("rejected")) return "Application Update";
+    if (text.contains("interview")) return "Interview Alert";
+    if (text.contains("job")) return "Job Update";
     return "Notification";
   }
 
@@ -125,11 +89,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   ),
                 ],
               ),
-              child: const Icon(
-                Icons.notifications_off,
-                color: Colors.white,
-                size: 54,
-              ),
+              child: const Icon(Icons.notifications_off,
+                  color: Colors.white, size: 54),
             ),
             const SizedBox(height: 20),
             Text(
@@ -156,6 +117,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = Theme.of(context).colorScheme.onSurface;
 
     return Scaffold(
       backgroundColor: isDark ? AppTheme.darkBg : AppTheme.lightBg,
@@ -164,18 +126,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           Positioned(
             top: -120,
             left: -80,
-            child: _glow(
-              260,
-              AppTheme.primary.withOpacity(0.22),
-            ),
+            child: _glow(260, AppTheme.primary.withOpacity(0.22)),
           ),
           Positioned(
             bottom: -140,
             right: -100,
-            child: _glow(
-              300,
-              Colors.blue.withOpacity(0.10),
-            ),
+            child: _glow(300, Colors.blue.withOpacity(0.10)),
           ),
           SafeArea(
             child: Column(
@@ -192,10 +148,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                             color: isDark ? Colors.white10 : Colors.white,
                             borderRadius: BorderRadius.circular(18),
                           ),
-                          child: Icon(
-                            Icons.arrow_back_ios_new_rounded,
-                            color: isDark ? Colors.white : Colors.black87,
-                          ),
+                          child: Icon(Icons.arrow_back_ios_new_rounded,
+                              color: textColor),
                         ),
                       ),
                       const SizedBox(width: 14),
@@ -203,20 +157,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              "Notifications 🔔",
-                              style: TextStyle(
-                                color: isDark ? Colors.white : Colors.black87,
-                                fontSize: 26,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              "Your latest updates",
-                              style: TextStyle(
-                                color: isDark ? Colors.white70 : Colors.black54,
-                              ),
-                            ),
+                            Text("Notifications 🔔",
+                                style: TextStyle(
+                                  color: textColor,
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.bold,
+                                )),
+                            Text("Your latest updates",
+                                style: TextStyle(
+                                  color: isDark
+                                      ? Colors.white70
+                                      : Colors.black54,
+                                )),
                           ],
                         ),
                       ),
@@ -227,8 +179,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   child: loading
                       ? const Center(
                           child: CircularProgressIndicator(
-                            color: AppTheme.primary,
-                          ),
+                              color: AppTheme.primary),
                         )
                       : notifications.isEmpty
                           ? emptyState(isDark)
@@ -240,34 +191,20 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                 itemCount: notifications.length,
                                 itemBuilder: (context, i) {
                                   final n = notifications[i];
-
                                   final msg = n['message'] ?? "";
 
-                                  final gradient =
-                                      gradients[i % gradients.length];
-
                                   return Container(
-                                    margin: const EdgeInsets.only(
-                                      bottom: 18,
-                                    ),
+                                    margin: const EdgeInsets.only(bottom: 18),
                                     padding: const EdgeInsets.all(18),
                                     decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                        colors: gradient,
-                                      ),
+                                      gradient: AppTheme.primaryGradient,
                                       borderRadius: BorderRadius.circular(28),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: gradient.first.withOpacity(
-                                            0.35,
-                                          ),
+                                          color: AppTheme.primary
+                                              .withOpacity(0.35),
                                           blurRadius: 20,
-                                          offset: const Offset(
-                                            0,
-                                            10,
-                                          ),
+                                          offset: const Offset(0, 10),
                                         ),
                                       ],
                                     ),
@@ -283,11 +220,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                             borderRadius:
                                                 BorderRadius.circular(20),
                                           ),
-                                          child: Icon(
-                                            getIcon(msg),
-                                            color: Colors.white,
-                                            size: 28,
-                                          ),
+                                          child: Icon(getIcon(msg),
+                                              color: Colors.white, size: 28),
                                         ),
                                         const SizedBox(width: 14),
                                         Expanded(
@@ -295,23 +229,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                getTitle(msg),
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
+                                              Text(getTitle(msg),
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.bold,
+                                                  )),
                                               const SizedBox(height: 8),
-                                              Text(
-                                                msg,
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 14,
-                                                  height: 1.5,
-                                                ),
-                                              ),
+                                              Text(msg,
+                                                  style: const TextStyle(
+                                                    color: Colors.white70,
+                                                    fontSize: 14,
+                                                    height: 1.5,
+                                                  )),
                                             ],
                                           ),
                                         ),
@@ -330,17 +260,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     );
   }
 
-  Widget _glow(
-    double size,
-    Color color,
-  ) {
+  Widget _glow(double size, Color color) {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
-      ),
+      decoration:
+          BoxDecoration(shape: BoxShape.circle, color: color),
     );
   }
 }

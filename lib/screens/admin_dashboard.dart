@@ -97,7 +97,7 @@ class AdminDashboard extends StatelessWidget {
                   children: [
                     const Icon(Icons.dashboard_customize, color: Colors.white, size: 80),
                     const SizedBox(height: 16),
-                    Text("AI Placement Admin",
+                    Text("HIREHUB Admin",
                         textAlign: TextAlign.center,
                         style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),

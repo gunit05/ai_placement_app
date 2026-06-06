@@ -188,10 +188,10 @@ class HomePage extends StatelessWidget {
                           ResumeUploadScreen(username: username)),
                       _quickCard(context, isDark, Icons.smart_toy, "AI Chatbot",
                           const ChatbotScreen()),
-                      _quickCard(context, isDark, Icons.quiz, "AI Quiz",
+                      _quickCard(context, isDark, Icons.quiz, "Quizzes",
                           QuizScreen(username: username)),
-                      _quickCard(context, isDark, Icons.school, "AI Aptitude",
-                          AptitudeScreen(username: username)),
+                      _quickCard(context, isDark, Icons.school,
+                          "Aptitude Tests", AptitudeScreen(username: username)),
                     ],
                   ),
 

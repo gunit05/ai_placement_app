@@ -372,10 +372,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
           Expanded(
             child: ListView.builder(
               controller: scrollController,
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom + 100,
-              ),
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.only(
+                bottom: 20,
+              ),
               itemCount: messages.length,
               itemBuilder: (_, i) {
                 final msg = messages[i];
@@ -389,61 +389,79 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             ),
           ),
           if (loading) typingIndicator(),
-          SafeArea(
-            top: false,
-            child: AnimatedPadding(
-              duration: const Duration(milliseconds: 200),
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
-              child: PremiumCard(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 8,
+          Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                border: Border(
+                  top: BorderSide(
+                    color: Colors.grey.withOpacity(.15),
+                  ),
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        focusNode: focusNode,
-                        controller: controller,
-                        textInputAction: TextInputAction.send,
-                        minLines: 1,
-                        maxLines: 4,
-                        onSubmitted: (_) => sendMessage(),
-                        style: TextStyle(
-                          color: isDark ? Colors.white : Colors.black87,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: "Ask anything...",
-                          hintStyle: TextStyle(
-                            color: isDark ? Colors.white54 : Colors.black45,
+              ),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(
+                  12,
+                  8,
+                  12,
+                  12,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  border: Border(
+                    top: BorderSide(
+                      color: Colors.white.withOpacity(.05),
+                    ),
+                  ),
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
                           ),
-                          border: InputBorder.none,
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? Colors.white.withOpacity(.08)
+                                : Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: TextField(
+                            controller: controller,
+                            focusNode: focusNode,
+                            minLines: 1,
+                            maxLines: 5,
+                            textInputAction: TextInputAction.send,
+                            onSubmitted: (_) => sendMessage(),
+                            decoration: const InputDecoration(
+                              hintText: "Message",
+                              border: InputBorder.none,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    InkWell(
-                      borderRadius: BorderRadius.circular(50),
-                      onTap: sendMessage,
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
+                      const SizedBox(width: 8),
+                      Container(
+                        width: 48,
+                        height: 48,
                         decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: AppTheme.primaryGradient,
                         ),
-                        child: const Icon(
-                          Icons.send_rounded,
-                          color: Colors.white,
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.send_rounded,
+                            color: Colors.white,
+                          ),
+                          onPressed: sendMessage,
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ),
-          ),
+              ))
         ],
       ),
     );

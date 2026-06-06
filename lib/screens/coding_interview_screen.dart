@@ -375,7 +375,7 @@ print()
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return PremiumScreen(
-      title: "Coding Interview",
+      title: "Coding Test",
       subtitle: "AI coding challenge practice",
       icon: Icons.code,
       scrollable: false,

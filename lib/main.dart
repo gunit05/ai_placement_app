@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-import 'screens/splash_screen.dart';
-import 'screens/reset_password_screen.dart';
-import 'theme/premium_ui.dart';
-import 'theme/theme_controller.dart';
+import 'package:hire_hub/screens/auth/splash_screen.dart';
+import 'package:hire_hub/screens/auth/reset_password_screen.dart';
+import 'package:hire_hub/theme/premium_ui.dart';
+import 'package:hire_hub/theme/theme_controller.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 

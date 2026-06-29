@@ -3,9 +3,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:local_auth/local_auth.dart';
 
-import '../screens/dashboard_screen.dart';
-import '../screens/login_screen.dart';
-import '../theme/premium_ui.dart';
+import 'package:hire_hub/screens/candidate/dashboard_screen.dart';
+import 'package:hire_hub/screens/auth/login_screen.dart';
+import 'package:hire_hub/theme/premium_ui.dart';
 
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
